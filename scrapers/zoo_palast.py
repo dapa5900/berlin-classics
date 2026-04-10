@@ -2,6 +2,7 @@ import locale
 from datetime import datetime
 from typing import Optional
 
+from playwright.async_api import Page
 from scrapers.base import BaseScraper, Screening
 
 try:
@@ -11,36 +12,32 @@ except locale.Error:
 
 
 class ZooPalastScraper(BaseScraper):
-    def get_screenings(self) -> list[Screening]:
-        program_data = self._fetch_program_api("zoopalast")
+    def __init__(self, cinema_name: str, url: str, page: Page):
+        super().__init__(cinema_name, url)
+        self.page = page
+
+    async def get_screenings(self) -> list[Screening]:
+        program_data = await self._fetch_program_api("zoopalast")
         if not program_data:
             return []
 
         return self._extract_classic_screenings(program_data, "Zoo Palast")
 
-    def _fetch_program_api(self, cinema_slug: str) -> Optional[dict]:
-        from playwright.sync_api import sync_playwright
-
+    async def _fetch_program_api(self, cinema_slug: str) -> Optional[dict]:
         program_data = {}
 
-        def handle_response(resp):
+        async def handle_response(resp):
             if "/program" in resp.url and "premiumkino" in resp.url:
                 try:
-                    program_data.update(resp.json())
+                    program_data.update(await resp.json())
                 except Exception:
                     pass
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context()
-            page = context.new_page()
-            page.on("response", handle_response)
-
-            url = f"https://{cinema_slug}.premiumkino.de/programm"
-            page.goto(url, wait_until="networkidle", timeout=30000)
-            page.wait_for_timeout(3000)
-            context.close()
-            browser.close()
+        self.page.on("response", handle_response)
+        url = f"https://{cinema_slug}.premiumkino.de/programm"
+        await self.page.goto(url, wait_until="networkidle", timeout=30000)
+        await self.page.wait_for_timeout(3000)
+        self.page.remove_listener("response", handle_response)
 
         return program_data if program_data else None
 
@@ -108,36 +105,32 @@ class ZooPalastScraper(BaseScraper):
 
 
 class AstorScraper(BaseScraper):
-    def get_screenings(self) -> list[Screening]:
-        program_data = self._fetch_program_api("berlin")
+    def __init__(self, cinema_name: str, url: str, page: Page):
+        super().__init__(cinema_name, url)
+        self.page = page
+
+    async def get_screenings(self) -> list[Screening]:
+        program_data = await self._fetch_program_api("berlin")
         if not program_data:
             return []
 
         return self._extract_classic_screenings(program_data, "Astor Film Lounge")
 
-    def _fetch_program_api(self, cinema_slug: str) -> Optional[dict]:
-        from playwright.sync_api import sync_playwright
-
+    async def _fetch_program_api(self, cinema_slug: str) -> Optional[dict]:
         program_data = {}
 
-        def handle_response(resp):
+        async def handle_response(resp):
             if "/program" in resp.url and "premiumkino" in resp.url:
                 try:
-                    program_data.update(resp.json())
+                    program_data.update(await resp.json())
                 except Exception:
                     pass
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context()
-            page = context.new_page()
-            page.on("response", handle_response)
-
-            url = f"https://{cinema_slug}.premiumkino.de/programm"
-            page.goto(url, wait_until="networkidle", timeout=30000)
-            page.wait_for_timeout(3000)
-            context.close()
-            browser.close()
+        self.page.on("response", handle_response)
+        url = f"https://{cinema_slug}.premiumkino.de/programm"
+        await self.page.goto(url, wait_until="networkidle", timeout=30000)
+        await self.page.wait_for_timeout(3000)
+        self.page.remove_listener("response", handle_response)
 
         return program_data if program_data else None
 

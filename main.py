@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import json
 import logging
 from datetime import datetime
@@ -6,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from playwright.async_api import async_playwright
 from yaml import Loader
 
 from scrapers.babylon import BabylonScraper
@@ -35,7 +37,7 @@ def load_config(config_path: str = "config.yaml") -> dict:
 
 
 def get_scraper(
-    cinema_config: dict, tmdb_service: Optional[TMDBService] = None
+    cinema_config: dict, tmdb_service: Optional[TMDBService] = None, page=None
 ) -> Optional[BaseScraper]:
     cinema_type = cinema_config.get("type")
     scraper_class = SCRAPER_MAP.get(cinema_type)
@@ -51,6 +53,8 @@ def get_scraper(
 
     if cinema_type in ("babylon", "bestofcinema") and tmdb_service:
         kwargs["tmdb_service"] = tmdb_service
+    if cinema_type in ("zoo_palast", "astor") and page:
+        kwargs["page"] = page
 
     return scraper_class(**kwargs)
 
@@ -160,7 +164,37 @@ def load_screenings_from_cache() -> Optional[list[Screening]]:
         return None
 
 
-def main():
+async def scrape_cinema(cinema, tmdb_service, context):
+    page = await context.new_page()
+    scraper = get_scraper(cinema, tmdb_service, page)
+    if not scraper:
+        await page.close()
+        return []
+
+    logger.info(f"Scraping {cinema['name']}...")
+    try:
+        screenings = await scraper.get_screenings()
+        logger.info(f"Found {len(screenings)} screenings at {cinema['name']}")
+
+        title_filters = cinema.get("title_filters", [])
+        screenings = filter_screenings(screenings, title_filters)
+        logger.info(f"After filtering: {len(screenings)} screenings")
+
+        skip_enriched = cinema.get("type") in ("babylon", "bestofcinema")
+        screenings = enrich_screenings(
+            screenings, tmdb_service, skip_if_enriched=skip_enriched
+        )
+        screenings = filter_no_tmdb(screenings)
+        logger.info(f"After TMDB filter: {len(screenings)} screenings")
+        return screenings
+    except Exception as e:
+        logger.error(f"Error scraping {cinema['name']}: {e}")
+        return []
+    finally:
+        await page.close()
+
+
+async def main_async():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--no-cache", action="store_true", help="Force fresh scraping, ignore cache"
@@ -188,29 +222,19 @@ def main():
 
     if not all_screenings:
         logger.info("Cache not found or disabled, scraping fresh...")
-        for cinema in config.get("cinemas", []):
-            scraper = get_scraper(cinema, tmdb_service)
-            if not scraper:
-                continue
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context()
 
-            logger.info(f"Scraping {cinema['name']}...")
-            try:
-                screenings = scraper.get_screenings()
-                logger.info(f"Found {len(screenings)} screenings at {cinema['name']}")
-
-                title_filters = cinema.get("title_filters", [])
-                screenings = filter_screenings(screenings, title_filters)
-                logger.info(f"After filtering: {len(screenings)} screenings")
-
-                skip_enriched = cinema.get("type") in ("babylon", "bestofcinema")
-                screenings = enrich_screenings(
-                    screenings, tmdb_service, skip_if_enriched=skip_enriched
-                )
-                screenings = filter_no_tmdb(screenings)
-                logger.info(f"After TMDB filter: {len(screenings)} screenings")
+            tasks = [
+                scrape_cinema(cinema, tmdb_service, context)
+                for cinema in config.get("cinemas", [])
+            ]
+            results = await asyncio.gather(*tasks)
+            for screenings in results:
                 all_screenings.extend(screenings)
-            except Exception as e:
-                logger.error(f"Error scraping {cinema['name']}: {e}")
+
+            await browser.close()
 
     if all_screenings:
         save_screenings_to_cache(all_screenings)
@@ -247,4 +271,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main_async())

@@ -16,8 +16,8 @@ class BestOfCinemaScraper(BaseScraper):
         super().__init__(cinema_name, url)
         self.tmdb_service = tmdb_service
 
-    def get_screenings(self) -> list[Screening]:
-        soup = self.fetch_page(self.url)
+    async def get_screenings(self) -> list[Screening]:
+        soup = await self.fetch_page(self.url)
         screenings = []
 
         movie_links = []
@@ -29,7 +29,7 @@ class BestOfCinemaScraper(BaseScraper):
                     movie_links.append(full_url)
 
         for movie_url in movie_links:
-            movie_data = self._fetch_movie_info(movie_url)
+            movie_data = await self._fetch_movie_info(movie_url)
             if not movie_data:
                 continue
 
@@ -92,8 +92,8 @@ class BestOfCinemaScraper(BaseScraper):
             return False
         return True
 
-    def _fetch_movie_info(self, url: str):
-        soup = self.fetch_page(url)
+    async def _fetch_movie_info(self, url: str):
+        soup = await self.fetch_page(url)
         if not soup:
             return None
 

@@ -16,8 +16,8 @@ class BabylonScraper(BaseScraper):
         super().__init__(cinema_name, url)
         self.tmdb_service = tmdb_service
 
-    def get_screenings(self) -> list[Screening]:
-        soup = self.fetch_page(self.url)
+    async def get_screenings(self) -> list[Screening]:
+        soup = await self.fetch_page(self.url)
         screenings = []
 
         for event in soup.select(".mix"):
@@ -60,7 +60,7 @@ class BabylonScraper(BaseScraper):
             babylon_runtime = 0
             babylon_original_title = None
             if url:
-                movie_info = self._fetch_movie_info(url)
+                movie_info = await self._fetch_movie_info(url)
                 if movie_info:
                     movie_title = movie_info[0]
                     babylon_year = movie_info[1]
@@ -116,10 +116,10 @@ class BabylonScraper(BaseScraper):
 
         return screenings
 
-    def _fetch_movie_info(
+    async def _fetch_movie_info(
         self, url: str
     ) -> Optional[Tuple[str, Optional[int], int, Optional[str]]]:
-        soup = self.fetch_page(url)
+        soup = await self.fetch_page(url)
         if not soup:
             return None
 
