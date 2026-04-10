@@ -1,0 +1,7 @@
+httpx
+beautifulsoup4
+lxml
+jinja2
+pyyaml
+playwright
+requests-cache

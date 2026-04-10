@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berlin Classics Newsletter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cinzel:wght@400;500;600&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, #1a0a0f 0%, #120810 40%, #0d080c 100%);
+            background-attachment: fixed;
+            color: #F5F1E8;
+            padding: 40px;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 60px 40px 40px;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        header::before {
+            content: '✦ ✦ ✦';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #D4AF37;
+            font-size: 14px;
+            letter-spacing: 15px;
+            background: #0d080c;
+            padding: 0 30px;
+        }
+        h1 {
+            font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+            font-size: 3.8em;
+            font-weight: 600;
+            color: #D4AF37;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(212,175,55,0.4);
+        }
+        .subtitle {
+            color: #c9c4bb;
+            font-size: 1.3em;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+        .meta {
+            color: #7a756d;
+            font-size: 0.85em;
+            margin-top: 25px;
+            font-style: italic;
+        }
+        .toggle-all-btn {
+            display: block;
+            margin: 0 auto 45px auto;
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            border: none;
+            color: #0d080c;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9em;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(212,175,55,0.3);
+        }
+        .toggle-all-btn:hover {
+            background: linear-gradient(135deg, #E5C158 0%, #D4AF37 100%);
+            box-shadow: 0 6px 30px rgba(212,175,55,0.5);
+            transform: translateY(-2px);
+        }
+        .export-btn-container {
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+        .floating-export-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(212,175,55,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .floating-export-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(212,175,55,0.7);
+        }
+        .floating-export-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #0d080c;
+        }
+        .cinema-section {
+            margin-bottom: 55px;
+            background: linear-gradient(180deg, rgba(30,18,25,0.8) 0%, rgba(18,10,15,0.9) 100%);
+            border-radius: 4px;
+            padding: 35px;
+            border: 1px solid rgba(212,175,55,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+        .cinema-title {
+            font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+            font-size: 1.5em;
+            color: #D4AF37;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(212,175,55,0.35);
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .cinema-title::before {
+            content: '❋';
+            margin-right: 12px;
+            color: #D4AF37;
+        }
+        .toggle-icon {
+            font-size: 1em;
+            color: #D4AF37;
+            transition: transform 0.2s ease;
+            font-weight: 300;
+        }
+        .cinema-screenings {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .cinema-screenings {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .cinema-screenings {
+                grid-template-columns: 1fr;
+            }
+        }
+        .screening-card {
+            background: linear-gradient(135deg, rgba(25,15,20,0.9) 0%, rgba(15,08,12,0.95) 100%);
+            border-radius: 3px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 0;
+            border: 1px solid rgba(212,175,55,0.12);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .screening-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(139,0,0,0.25), 0 0 20px rgba(212,175,55,0.1);
+            border-color: rgba(212,175,55,0.35);
+        }
+        .card-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+        }
+        .card-date {
+            font-size: 0.8em;
+            color: #D4AF37;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .poster {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 2px;
+            background: #1a1015;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 1px #D4AF37;
+            border: 1px solid rgba(212,175,55,0.2);
+            display: block;
+            margin: 0 auto 15px auto;
+        }
+        .poster-placeholder {
+            width: 100%;
+            max-width: 180px;
+            aspect-ratio: 2/3;
+            background: linear-gradient(180deg, #1a1015 0%, #0d080c 100%);
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5a5550;
+            font-size: 0.7em;
+            border: 1px dashed rgba(212,175,55,0.15);
+            margin: 0 auto 15px auto;
+        }
+        .card-date {
+            font-size: 0.8em;
+            color: #D4AF37;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .card-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #D4AF37;
+        }
+        .screening-details {
+            text-align: center;
+            font-size: 0.85em;
+            color: #a09890;
+            margin-top: 10px;
+        }
+        .screening-details a {
+            color: #D4AF37;
+            font-size: 1em;
+        }
+        .date-divider {
+            font-size: 0.85em;
+            color: #D4AF37;
+            padding: 8px 0;
+            margin: 25px 0 15px 0;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .date-divider:first-child {
+            margin-top: 0;
+        }
+        .date-group {
+            margin-bottom: 10px;
+        }
+        .screening-info {
+            text-align: center;
+            width: 100%;
+        }
+        .movie-title {
+            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            white-space: normal;
+            color: #F5F1E8;
+            line-height: 1.35;
+            letter-spacing: 0.3px;
+        }
+        .movie-title a {
+            color: #F5F1E8;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .movie-title a:hover {
+            color: #D4AF37;
+        }
+        .screening-details {
+            color: #a8a29e;
+            font-size: 0.95em;
+        }
+        .year {
+            color: #F5F1E8;
+            font-family: 'Cinzel', serif;
+            font-size: 0.8em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .tmdb-link {
+            color: #D4AF37;
+            font-size: 0.95em;
+            text-decoration: underline;
+        }
+        .tmdb-link:hover {
+            opacity: 0.8;
+        }
+        .no-screenings {
+            color: #6a6560;
+            font-style: italic;
+            padding: 30px;
+            text-align: center;
+            background: rgba(15,08,10,0.5);
+            border-radius: 3px;
+            border: 1px dashed rgba(212,175,55,0.15);
+        }
+        footer {
+            text-align: center;
+            padding: 60px 0 40px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(212,175,55,0.15);
+            color: #5a5550;
+            font-size: 0.85em;
+        }
+        footer p {
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 2.2em;
+                letter-spacing: 4px;
+            }
+            .subtitle {
+                font-size: 1em;
+                letter-spacing: 2px;
+            }
+            .cinema-section {
+                padding: 22px;
+                margin-bottom: 35px;
+            }
+            .cinema-title {
+                font-size: 1.2em;
+            }
+            .screening-card {
+                flex-direction: column;
+                gap: 18px;
+                padding: 20px;
+            }
+            .poster, .poster-placeholder {
+                width: 100%;
+                height: 200px;
+            }
+            .movie-title {
+                font-size: 1.25em;
+            }
+            .screening-details {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Berlin Classics</h1>
+            <p class="subtitle">Klassische Filme in Berliner Kinos</p>
+            <p class="meta">Generiert am {{ generated_at.strftime('%d.%m.%Y um %H:%M') }}</p>
+        </header>
+
+        <p style="text-align: center; margin: 20px 0;">
+            <button class="toggle-all-btn" onclick="toggleAll()">Alle expandieren / einklappen</button>
+        </p>
+
+        {% set grouped = {} %}
+        {% for screening in screenings %}
+            {% if screening.cinema_name not in grouped %}
+                {% set _ = grouped.update({screening.cinema_name: []}) %}
+            {% endif %}
+            {% set _ = grouped[screening.cinema_name].append(screening) %}
+        {% endfor %}
+
+        {% for cinema_name, cinema_screenings in grouped.items()|sort %}
+            <section class="cinema-section">
+                <h2 class="cinema-title" onclick="toggleCinema(this)" style="cursor: pointer;">{{ cinema_name }} <span class="toggle-icon">+</span></h2>
+                
+                {% if cinema_screenings %}
+                    <div class="cinema-screenings" style="display: none;">
+                    {% for screening in cinema_screenings|sort(attribute='date') %}
+                        <article class="screening-card">
+                            <div class="card-header">
+                                <div class="card-date">{{ screening.date.strftime('%a, %d.%m.%Y') }}</div>
+                                <div class="card-checkbox">
+                                    <input type="checkbox" 
+                                           class="movie-select" 
+                                           data-title="{{ screening.movie_title }}"
+                                           data-year="{{ screening.year }}"
+                                           data-date="{{ screening.date.strftime('%Y-%m-%d') }}"
+                                           data-time="{{ screening.date.strftime('%H:%M') }}"
+                                           data-runtime="{{ screening.runtime }}"
+                                           data-cinema="{{ screening.cinema_name }}"
+                                           data-location="{{ cinema_config.cinemas|selectattr('name', 'equalto', screening.cinema_name)|map(attribute='google_maps_url')|first|default('') }}"
+                                            data-url="{{ screening.url }}"
+                                            data-tmdb-url="{{ screening.tmdb_url }}">
+                                </div>
+                            </div>
+                            
+                            {% if screening.url %}
+                                <a href="{{ screening.url }}" target="_blank">
+                            {% endif %}
+                            {% if screening.poster_url %}
+                                <img src="{{ screening.poster_url }}" alt="{{ screening.movie_title }}" class="poster">
+                            {% else %}
+                                <div class="poster-placeholder"></div>
+                            {% endif %}
+                            {% if screening.url %}</a>{% endif %}
+                            
+                            <div class="screening-info">
+                                <h3 class="movie-title">
+                                    {% if screening.url %}
+                                        <a href="{{ screening.url }}" target="_blank">{{ screening.movie_title }}</a>
+                                    {% else %}
+                                        {{ screening.movie_title }}
+                                    {% endif %}
+                                    {% if screening.year %}
+                                        <span class="year">({{ screening.year }})</span>
+                                    {% endif %}
+                                </h3>
+                                <p class="screening-details">
+                                    {% if screening.cinema_name == 'Best of Cinema' %}
+                                        Ganztägig
+                                    {% else %}
+                                        {{ screening.date.strftime('%H:%M') }}{% if screening.runtime %} · {{ screening.runtime }} Min.{% endif %}
+                                    {% endif %}
+                                    {% if screening.tmdb_url %} · <a href="{{ screening.tmdb_url }}" target="_blank" class="tmdb-link" title="Auf TMDB ansehen">TMDB</a>{% endif %}
+                                </p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            </section>
+        {% endfor %}
+
+        <div class="export-btn-container">
+            <button class="floating-export-btn" onclick="exportToCalendar()" title="Ausgewählte Termine in Kalender exportieren">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+        <footer>
+            <p>Berlin Classics Newsletter</p>
+            <p>Filmscreening-Daten von {% for cinema in cinema_config.cinemas|default([])|sort(attribute='name') %}<a href="{{ cinema.url }}" target="_blank" style="color: #D4AF37;">{{ cinema.name }}</a>{% if not loop.last %}{% if loop.index == loop.length - 1 %} und {% else %}, {% endif %}{% endif %}{% endfor %}</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleCinema(element) {
+            var screenings = element.nextElementSibling;
+            var icon = element.querySelector('.toggle-icon');
+            if (screenings.style.display === 'none') {
+                screenings.style.display = 'grid';
+                icon.textContent = '-';
+            } else {
+                screenings.style.display = 'none';
+                icon.textContent = '+';
+            }
+        }
+
+        function toggleAll() {
+            var allSections = document.querySelectorAll('.cinema-screenings');
+            var allIcons = document.querySelectorAll('.toggle-icon');
+            var anyCollapsed = false;
+            
+            for (var i = 0; i < allSections.length; i++) {
+                if (allSections[i].style.display === 'none') {
+                    anyCollapsed = true;
+                    break;
+                }
+            }
+            
+            for (var i = 0; i < allSections.length; i++) {
+                allSections[i].style.display = anyCollapsed ? 'grid' : 'none';
+                allIcons[i].textContent = anyCollapsed ? '-' : '+';
+            }
+        }
+
+        function exportToCalendar() {
+            var checkboxes = document.querySelectorAll('.movie-select:checked');
+            if (checkboxes.length === 0) {
+                alert('Bitte wähle mindestens einen Film aus.');
+                return;
+            }
+
+            var icsContent = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Berlin Classics//Newsletter//EN\r\n';
+            
+            checkboxes.forEach(function(checkbox) {
+                var title = checkbox.dataset.title || '';
+                var year = checkbox.dataset.year || '';
+                var date = checkbox.dataset.date || '';
+                var time = checkbox.dataset.time || '19:00';
+                var runtime = parseInt(checkbox.dataset.runtime) || 0;
+                var cinema = checkbox.dataset.cinema || '';
+                var location = checkbox.dataset.location || '';
+                var url = checkbox.dataset.url || '';
+                var tmdbUrl = checkbox.dataset.tmdbUrl || '';
+
+                var summary = title;
+                if (year) {
+                    summary += ' (' + year + ')';
+                }
+
+                var startDateTime = date.replace(/-/g, '') + 'T' + time.replace(/:/g, '') + '00';
+                
+                // Calculate end time directly without timezone issues
+                var timeParts = time.split(':');
+                var hours = parseInt(timeParts[0]);
+                var mins = parseInt(timeParts[1]);
+                var totalMinutes = hours * 60 + mins + runtime;
+                var endHours = Math.floor(totalMinutes / 60);
+                var endMins = totalMinutes % 60;
+
+                // Round up to nearest 30 minutes
+                if (endMins > 0 && endMins <= 30) {
+                    endMins = 30;
+                } else if (endMins > 30) {
+                    endHours = endHours + 1;
+                    endMins = 0;
+                } else if (endMins === 0) {
+                    // Already at full hour, keep as is
+                }
+
+                // Format with leading zeros
+                var endHourStr = endHours.toString().padStart(2, '0');
+                var endMinStr = endMins.toString().padStart(2, '0');
+                var endDateFormatted = date.replace(/-/g, '') + 'T' + endHourStr + endMinStr + '00';
+
+                var isAllDay = (time === '00:00' || !time);
+                
+                icsContent += 'BEGIN:VEVENT\r\n';
+                icsContent += 'SUMMARY:' + summary + '\r\n';
+                
+                if (isAllDay) {
+                    var nextDay = new Date(date);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    var nextDayStr = nextDay.toISOString().replace(/-/g, '').substring(0, 8);
+                    icsContent += 'DTSTART;VALUE=DATE:' + date.replace(/-/g, '') + '\r\n';
+                    icsContent += 'DTEND;VALUE=DATE:' + nextDayStr + '\r\n';
+                } else {
+                    icsContent += 'DTSTART:' + startDateTime + '\r\n';
+                    icsContent += 'DTEND:' + endDateFormatted + '\r\n';
+                }
+                
+                if (location) {
+                    icsContent += 'LOCATION:' + location + '\r\n';
+                } else if (cinema) {
+                    icsContent += 'LOCATION:' + cinema + '\r\n';
+                }
+                
+                var description = '';
+                if (url) {
+                    description += 'Film: ' + url + '\r\n';
+                }
+                if (tmdbUrl) {
+                    description += 'TMDB: ' + tmdbUrl + '\r\n';
+                }
+                if (description) {
+                    icsContent += 'DESCRIPTION:' + description.replace(/\r?\n/g, '\\n') + '\r\n';
+                }
+                
+                icsContent += 'END:VEVENT\r\n';
+            });
+            
+            icsContent += 'END:VCALENDAR\r\n';
+
+            var blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'berlin-classics-events.ics';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

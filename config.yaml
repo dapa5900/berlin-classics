@@ -1,0 +1,40 @@
+cinemas:
+  - name: "Babylon"
+    url: "https://babylonberlin.eu/programm"
+    type: "babylon"
+    google_maps_url: "https://maps.app.goo.gl/mgLCZxrr5rSbaaJJ6"
+    title_filters:
+      - "Babylon Orchester Berlin"
+      - "Film Festival"
+      - "CinemAperitivo"
+      - "Kinderwagenkino"
+      - "Live"
+      - "Workshop"
+      - "Podcast"
+      - "Filmmaking"
+  - name: "Zoo Palast"
+    url: "https://zoopalast.premiumkino.de/programm"
+    type: "zoo_palast"
+    google_maps_url: "https://maps.app.goo.gl/2LVqzeNwsweC1Fu57"
+    title_filters: []
+  - name: "Astor Film Lounge"
+    url: "https://berlin.premiumkino.de/programm"
+    type: "astor"
+    google_maps_url: "https://maps.app.goo.gl/vND4S4on95jzCAXM7"
+    title_filters: []
+  - name: "Best of Cinema"
+    url: "https://www.bestofcinema.de/"
+    type: "bestofcinema"
+    google_maps_url: null
+    title_filters: []
+
+newsletter:
+  classical_year_threshold: 2010
+
+tmdb:
+  api_key: "de81745c71acc218301e34defd892959"  # Get free API key from https://www.themoviedb.org/settings/api
+  language: "de-DE"
+
+output:
+  directory: "output"
+  filename_template: "newsletter_{date}.html"
