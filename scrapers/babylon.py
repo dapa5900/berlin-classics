@@ -20,6 +20,8 @@ class BabylonScraper(BaseScraper):
         soup = await self.fetch_page(self.url)
         screenings = []
 
+        # Collect all basic screening info first
+        raw_events = []
         for event in soup.select(".mix"):
             title_elem = event.select_one(".mix-title")
             date_elem = event.select_one(".mix-date")
@@ -56,65 +58,81 @@ class BabylonScraper(BaseScraper):
             if img_elem:
                 poster_url = img_elem.get("src") or img_elem.get("data-src")
 
-            babylon_year = None
-            babylon_runtime = 0
-            babylon_original_title = None
-            if url:
-                movie_info = await self._fetch_movie_info(url)
+            raw_events.append(
+                {
+                    "movie_title": movie_title,
+                    "date": screening_date,
+                    "url": url,
+                    "poster_url": poster_url,
+                }
+            )
+
+        # 1. Parallel Fetch Movie Info
+        semaphore = asyncio.Semaphore(5)  # Max 5 concurrent requests
+
+        async def fetch_and_enrich(event):
+            async with semaphore:
+                movie_info = None
+                if event["url"]:
+                    movie_info = await self._fetch_movie_info(event["url"])
+
+                movie_title = event["movie_title"]
+                babylon_year = None
+                runtime = 0
+                babylon_original_title = None
+
                 if movie_info:
                     movie_title = movie_info[0]
                     babylon_year = movie_info[1]
-                    babylon_runtime = movie_info[2] if len(movie_info) > 2 else 0
+                    runtime = movie_info[2] if len(movie_info) > 2 else 0
                     babylon_original_title = (
                         movie_info[3] if len(movie_info) > 3 else None
                     )
-                    if babylon_original_title:
-                        logger.info(
-                            f"Extracted original_title '{babylon_original_title}' for '{movie_title}'"
-                        )
 
-            year = babylon_year
-            tmdb_url = None
-            runtime = babylon_runtime
-            keep_original_title = False
+                # TMDB Lookup
+                tmdb_url = None
+                year = babylon_year
+                poster_url = event["poster_url"]
+                keep_original_title = False
 
-            if self.tmdb_service and movie_title:
-                keep_original_title = self.tmdb_service._is_multi_part_title(
-                    movie_title
-                )
-                tmdb_info = self.tmdb_service.get_movie_info(
-                    movie_title,
-                    babylon_year,
-                    keep_original_title,
-                    babylon_original_title,
-                )
-                if tmdb_info and len(tmdb_info) == 5:
-                    tmdb_title, tmdb_year, tmdb_poster, tmdb_url, tmdb_runtime = (
-                        tmdb_info
+                if self.tmdb_service and movie_title:
+                    keep_original_title = self.tmdb_service._is_multi_part_title(
+                        movie_title
                     )
-                    if not keep_original_title and tmdb_title:
-                        movie_title = tmdb_title
-                    if not babylon_year and tmdb_year:
-                        year = tmdb_year
-                    if tmdb_poster:
-                        poster_url = tmdb_poster
-                    if not runtime and tmdb_runtime:
-                        runtime = tmdb_runtime
+                    tmdb_info = self.tmdb_service.get_movie_info(
+                        movie_title,
+                        babylon_year,
+                        keep_original_title,
+                        babylon_original_title,
+                    )
+                    if tmdb_info and len(tmdb_info) == 5:
+                        tmdb_title, tmdb_year, tmdb_poster, tmdb_url, tmdb_runtime = (
+                            tmdb_info
+                        )
+                        if not keep_original_title and tmdb_title:
+                            movie_title = tmdb_title
+                        if not babylon_year and tmdb_year:
+                            year = tmdb_year
+                        if tmdb_poster:
+                            poster_url = tmdb_poster
+                        if not runtime and tmdb_runtime:
+                            runtime = tmdb_runtime
 
-            screenings.append(
-                Screening(
+                return Screening(
                     cinema_name=self.cinema_name,
                     movie_title=movie_title,
-                    date=screening_date,
-                    url=url,
+                    date=event["date"],
+                    url=event["url"],
                     poster_url=poster_url,
                     year=year,
                     tmdb_url=tmdb_url,
                     runtime=runtime,
                 )
-            )
 
-        return screenings
+        tasks = [fetch_and_enrich(event) for event in raw_events]
+        screenings = await asyncio.gather(*tasks)
+
+        return list(screenings)
 
     async def _fetch_movie_info(
         self, url: str
