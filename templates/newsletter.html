@@ -446,14 +446,14 @@
         {% endfor %}
 
         <div class="export-btn-container">
-            <button class="floating-btn" onclick="exportToCalendar()" title="Ausgewählte Termine in Kalender exportieren">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
-                </svg>
-            </button>
             <button class="floating-btn" onclick="toggleAll()" title="Alle expandieren / einklappen">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="fill:#0d080c; width:24px; height:24px;">
                     <path d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/>
+                </svg>
+            </button>
+            <button class="floating-btn" onclick="exportToCalendar()" title="Ausgewählte Termine in Kalender exportieren">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
                 </svg>
             </button>
         </div>
@@ -481,18 +481,23 @@
         function toggleAll() {
             var allSections = document.querySelectorAll('.cinema-screenings');
             var allIcons = document.querySelectorAll('.toggle-icon');
-            var anyCollapsed = false;
             
+            // Prüfen, ob irgendein Bereich derzeit sichtbar ist
+            var isAnyVisible = false;
             for (var i = 0; i < allSections.length; i++) {
-                if (allSections[i].style.display === 'none') {
-                    anyCollapsed = true;
+                if (allSections[i].style.display !== 'none') {
+                    isAnyVisible = true;
                     break;
                 }
             }
             
+            // Logik: Wenn etwas sichtbar ist -> alles schließen. Sonst -> alles öffnen.
+            var action = isAnyVisible ? 'none' : 'grid';
+            var iconText = isAnyVisible ? '+' : '-';
+            
             for (var i = 0; i < allSections.length; i++) {
-                allSections[i].style.display = anyCollapsed ? 'grid' : 'none';
-                allIcons[i].textContent = anyCollapsed ? '-' : '+';
+                allSections[i].style.display = action;
+                allIcons[i].textContent = iconText;
             }
         }
 
