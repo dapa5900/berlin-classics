@@ -161,6 +161,18 @@ CACHE_DIR = Path("cache")
 CACHE_FILE = CACHE_DIR / "screenings.json"
 
 
+def _cleanup_old_newsletters(output_dir: str) -> None:
+    output_path = Path(output_dir)
+    if not output_path.exists():
+        return
+
+    newsletter_files = sorted(output_path.glob("newsletter_*.html"), reverse=True)
+    if len(newsletter_files) > 1:
+        for old_file in newsletter_files[1:]:
+            old_file.unlink()
+            logger.info(f"Removed old newsletter: {old_file.name}")
+
+
 def save_screenings_to_cache(screenings: list[Screening]) -> None:
     CACHE_DIR.mkdir(exist_ok=True)
     data = []
@@ -295,6 +307,9 @@ async def main_async():
 
     if all_screenings:
         save_screenings_to_cache(all_screenings)
+
+    # Clean up old newsletters before generating a new one
+    _cleanup_old_newsletters(output_dir)
 
     all_screenings.sort(key=lambda s: s.date)
 
