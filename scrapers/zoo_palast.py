@@ -19,7 +19,7 @@ class PremiumKinoScraper(BaseScraper):
         cinema_name: str,
         url: str,
         page: Page,
-        threshold_year: int = 2010,
+        threshold_year: int,
     ):
         super().__init__(cinema_name, url)
         self.page = page
@@ -114,7 +114,7 @@ class ZooPalastScraper(PremiumKinoScraper):
         cinema_name: str,
         url: str,
         page: Page,
-        threshold_year: int = 2010,
+        threshold_year: int,
     ):
         super().__init__(cinema_name, url, page, threshold_year)
         self._cinema_domain = "zoopalast.premiumkino.de"
@@ -126,7 +126,7 @@ class AstorScraper(PremiumKinoScraper):
         cinema_name: str,
         url: str,
         page: Page,
-        threshold_year: int = 2010,
+        threshold_year: int,
     ):
         super().__init__(cinema_name, url, page, threshold_year)
         self._cinema_domain = "berlin.premiumkino.de"
