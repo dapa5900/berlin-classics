@@ -2,11 +2,14 @@ import argparse
 import asyncio
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import httpx
 import yaml
+from dotenv import load_dotenv
 from playwright.async_api import async_playwright
 from yaml import Loader
 
@@ -16,6 +19,9 @@ from scrapers.bestofcinema import BestOfCinemaScraper
 from scrapers.zoo_palast import AstorScraper, ZooPalastScraper
 from services.newsletter import NewsletterGenerator
 from services.tmdb import TMDBService
+
+# Load .env file if it exists (TMDB_API_KEY, etc.)
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,7 +39,7 @@ SCRAPER_MAP = {
 
 def load_config(config_path: str = "config.yaml") -> dict:
     with open(config_path, encoding="utf-8") as f:
-        return yaml.load(f, Loader=Loader)
+        return yaml.safe_load(f)
 
 
 def get_scraper(
@@ -79,35 +85,72 @@ def filter_no_tmdb(screenings: list[Screening]) -> list[Screening]:
     return [s for s in screenings if s.tmdb_url]
 
 
-def enrich_screenings(
+async def _check_image_accessible(url: str) -> bool:
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            response = await client.head(url)
+            return response.status_code == 200
+    except Exception:
+        return False
+
+
+async def _validate_and_fix_posters(
+    screenings: list[Screening], tmdb_service: TMDBService
+) -> list[Screening]:
+    fixed = 0
+    for screening in screenings:
+        if not screening.poster_url:
+            continue
+        if not await _check_image_accessible(screening.poster_url):
+            logger.info(f"Stale poster for '{screening.movie_title}', re-fetching...")
+            info = await tmdb_service.get_movie_info(screening.movie_title)
+            if info and info[2]:
+                screening.poster_url = info[2]
+                fixed += 1
+                logger.info(f"  Fixed: {screening.poster_url}")
+            else:
+                screening.poster_url = None
+                logger.warning(f"  Could not fix poster for '{screening.movie_title}'")
+    if fixed:
+        logger.info(f"Fixed {fixed} stale poster(s)")
+    return screenings
+
+
+async def enrich_screenings(
     screenings: list[Screening],
     tmdb_service: TMDBService,
     skip_if_enriched: bool = False,
 ) -> list[Screening]:
-    for screening in screenings:
+    async def enrich_one(screening: Screening) -> Screening:
         should_skip = skip_if_enriched and screening.tmdb_url
-        if not should_skip:
-            keep_original_title = tmdb_service._is_multi_part_title(
-                screening.movie_title
-            )
-            info = tmdb_service.get_movie_info(
-                screening.movie_title, keep_original_title=keep_original_title
-            )
-            if info:
-                tmdb_title, tmdb_year, tmdb_poster, tmdb_url, runtime = info
-                if not keep_original_title and tmdb_title:
-                    screening.movie_title = tmdb_title
-                if tmdb_year:
-                    screening.year = tmdb_year
-                if tmdb_poster:
-                    screening.poster_url = tmdb_poster
-                if tmdb_url:
-                    screening.tmdb_url = tmdb_url
-                if runtime:
-                    screening.runtime = runtime
+        if should_skip:
+            return screening
+
+        keep_original_title = tmdb_service._is_multi_part_title(
+            screening.movie_title
+        )
+        info = await tmdb_service.get_movie_info(
+            screening.movie_title, keep_original_title=keep_original_title
+        )
+        if info:
+            tmdb_title, tmdb_year, tmdb_poster, tmdb_url, runtime = info
+            if not keep_original_title and tmdb_title:
+                screening.movie_title = tmdb_title
+            if tmdb_year:
+                screening.year = tmdb_year
+            if tmdb_poster:
+                screening.poster_url = tmdb_poster
+            if tmdb_url:
+                screening.tmdb_url = tmdb_url
+            if runtime:
+                screening.runtime = runtime
         if not screening.runtime:
             screening.runtime = 90
-    return screenings
+        return screening
+
+    tasks = [enrich_one(s) for s in screenings]
+    results = await asyncio.gather(*tasks)
+    return list(results)
 
 
 CACHE_DIR = Path("cache")
@@ -164,7 +207,7 @@ def load_screenings_from_cache() -> Optional[list[Screening]]:
         return None
 
 
-async def scrape_cinema(cinema, tmdb_service, context):
+async def scrape_cinema(cinema, tmdb_service, context, threshold_year: int = 2010):
     page = await context.new_page()
     scraper = get_scraper(cinema, tmdb_service, page)
     if not scraper:
@@ -181,7 +224,7 @@ async def scrape_cinema(cinema, tmdb_service, context):
         logger.info(f"After filtering: {len(screenings)} screenings")
 
         skip_enriched = cinema.get("type") in ("babylon", "bestofcinema")
-        screenings = enrich_screenings(
+        screenings = await enrich_screenings(
             screenings, tmdb_service, skip_if_enriched=skip_enriched
         )
         screenings = filter_no_tmdb(screenings)
@@ -207,8 +250,15 @@ async def main_async():
     threshold = config.get("newsletter", {}).get("classical_year_threshold", 2010)
 
     tmdb_config = config.get("tmdb", {})
-    api_key = tmdb_config.get("api_key", "")
     language = tmdb_config.get("language", "de-DE")
+    api_key = os.environ.get("TMDB_API_KEY", "")
+
+    if not api_key:
+        logger.error(
+            "TMDB_API_KEY environment variable is not set. "
+            "Copy .env.example to .env and add your API key."
+        )
+        return
 
     tmdb_service = TMDBService(api_key=api_key, language=language)
 
@@ -219,6 +269,9 @@ async def main_async():
         if cached:
             all_screenings = cached
             logger.info(f"Using {len(all_screenings)} screenings from cache")
+            all_screenings = await _validate_and_fix_posters(
+                all_screenings, tmdb_service
+            )
 
     if not all_screenings:
         logger.info("Cache not found or disabled, scraping fresh...")
@@ -227,7 +280,7 @@ async def main_async():
             context = await browser.new_context()
 
             tasks = [
-                scrape_cinema(cinema, tmdb_service, context)
+                scrape_cinema(cinema, tmdb_service, context, threshold)
                 for cinema in config.get("cinemas", [])
             ]
             results = await asyncio.gather(*tasks)

@@ -68,7 +68,7 @@ class BabylonScraper(BaseScraper):
                 }
             )
 
-        # 1. Parallel Fetch Movie Info
+        # Parallel enrich all events
         semaphore = asyncio.Semaphore(5)  # Max 5 concurrent requests
 
         async def fetch_and_enrich(event):
@@ -100,7 +100,7 @@ class BabylonScraper(BaseScraper):
                     keep_original_title = self.tmdb_service._is_multi_part_title(
                         movie_title
                     )
-                    tmdb_info = self.tmdb_service.get_movie_info(
+                    tmdb_info = await self.tmdb_service.get_movie_info(
                         movie_title,
                         babylon_year,
                         keep_original_title,

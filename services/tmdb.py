@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Optional, Tuple
 
-import requests
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -79,21 +79,20 @@ class TMDBService:
         cleaned = re.sub(r"\s+", " ", cleaned)
         return cleaned.strip()
 
-    def _get_movie_runtime(self, tmdb_id: int) -> Optional[int]:
+    async def _get_movie_runtime(self, tmdb_id: int) -> Optional[int]:
         try:
             details_url = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
-            params = {
-                "api_key": self.api_key,
-            }
-            response = requests.get(details_url, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            return data.get("runtime")
+            params = {"api_key": self.api_key}
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.get(details_url, params=params)
+                response.raise_for_status()
+                data = response.json()
+                return data.get("runtime")
         except Exception as e:
             logger.error(f"Error getting runtime for TMDB ID {tmdb_id}: {e}")
             return None
 
-    def get_movie_info(
+    async def get_movie_info(
         self,
         movie_title: str,
         expected_year: Optional[int] = None,
@@ -134,9 +133,8 @@ class TMDBService:
                         "query": original_cleaned,
                         "language": orig_lang,
                     }
-                    orig_response = requests.get(
-                        search_url, params=orig_params, timeout=10
-                    )
+                    async with httpx.AsyncClient(timeout=10) as client:
+                        orig_response = await client.get(search_url, params=orig_params)
                     orig_response.raise_for_status()
                     orig_data = orig_response.json()
 
@@ -163,7 +161,8 @@ class TMDBService:
                         "query": cleaned_title,
                         "language": lang,
                     }
-                    response = requests.get(search_url, params=params, timeout=10)
+                    async with httpx.AsyncClient(timeout=10) as client:
+                        response = await client.get(search_url, params=params)
                     response.raise_for_status()
                     data = response.json()
 
@@ -254,7 +253,7 @@ class TMDBService:
 
             runtime = movie.get("runtime")
             if not runtime and tmdb_id:
-                runtime = self._get_movie_runtime(tmdb_id)
+                runtime = await self._get_movie_runtime(tmdb_id)
 
             result = (full_title, year, poster_url, tmdb_url, runtime)
             self._cache[cache_key] = result

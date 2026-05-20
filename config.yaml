@@ -32,7 +32,6 @@ newsletter:
   classical_year_threshold: 2010
 
 tmdb:
-  api_key: "de81745c71acc218301e34defd892959"  # Get free API key from https://www.themoviedb.org/settings/api
   language: "de-DE"
 
 output:

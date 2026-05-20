@@ -41,7 +41,7 @@ class BestOfCinemaScraper(BaseScraper):
                 keep_original_title = self.tmdb_service._is_multi_part_title(
                     movie_title
                 )
-                tmdb_info = self.tmdb_service.get_movie_info(
+                tmdb_info = await self.tmdb_service.get_movie_info(
                     movie_title, year, keep_original_title
                 )
                 if tmdb_info and len(tmdb_info) == 5:
