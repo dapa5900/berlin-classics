@@ -12,9 +12,13 @@ logger = logging.getLogger(__name__)
 
 class BabylonScraper(BaseScraper):
     def __init__(
-        self, cinema_name: str, url: str, tmdb_service: Optional[TMDBService] = None
+        self,
+        cinema_name: str,
+        url: str,
+        tmdb_service: Optional[TMDBService] = None,
+        threshold_year: int = 2010,
     ):
-        super().__init__(cinema_name, url)
+        super().__init__(cinema_name, url, threshold_year)
         self.tmdb_service = tmdb_service
 
     async def get_screenings(self) -> list[Screening]:
@@ -133,7 +137,10 @@ class BabylonScraper(BaseScraper):
         tasks = [fetch_and_enrich(event) for event in raw_events]
         screenings = await asyncio.gather(*tasks)
 
-        return list(screenings)
+        filtered = [
+            s for s in screenings if s.year is None or s.year <= self.threshold_year
+        ]
+        return list(filtered)
 
     async def _fetch_movie_info(
         self, url: str

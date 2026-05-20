@@ -11,9 +11,13 @@ logger = logging.getLogger(__name__)
 
 class BestOfCinemaScraper(BaseScraper):
     def __init__(
-        self, cinema_name: str, url: str, tmdb_service: Optional[TMDBService] = None
+        self,
+        cinema_name: str,
+        url: str,
+        tmdb_service: Optional[TMDBService] = None,
+        threshold_year: int = 2010,
     ):
-        super().__init__(cinema_name, url)
+        super().__init__(cinema_name, url, threshold_year)
         self.tmdb_service = tmdb_service
 
     async def get_screenings(self) -> list[Screening]:
@@ -57,6 +61,9 @@ class BestOfCinemaScraper(BaseScraper):
                     if tmdb_runtime:
                         runtime = tmdb_runtime
 
+            if year and year > self.threshold_year:
+                continue
+
             screenings.append(
                 Screening(
                     cinema_name=self.cinema_name,
@@ -66,7 +73,6 @@ class BestOfCinemaScraper(BaseScraper):
                     poster_url=poster_url,
                     year=year,
                     tmdb_url=tmdb_url,
-                    skip_year_filter=True,
                     runtime=runtime,
                 )
             )

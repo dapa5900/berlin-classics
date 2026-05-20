@@ -23,9 +23,15 @@ class Screening:
 
 
 class BaseScraper:
-    def __init__(self, cinema_name: str, url: str):
+    def __init__(
+        self,
+        cinema_name: str,
+        url: str,
+        threshold_year: int = 2010,
+    ):
         self.cinema_name = cinema_name
         self.url = url
+        self.threshold_year = threshold_year
         self._last_request_time: Optional[datetime] = None
 
     async def get_screenings(self) -> list[Screening]:

@@ -308,14 +308,14 @@ async def main_async():
     if all_screenings:
         save_screenings_to_cache(all_screenings)
 
-    # Clean up old newsletters before generating a new one
-    _cleanup_old_newsletters(output_dir)
-
     all_screenings.sort(key=lambda s: s.date)
 
     output_config = config.get("output", {})
     output_dir = output_config.get("directory", "output")
     filename_template = output_config.get("filename_template", "newsletter_{date}.html")
+
+    # Clean up old newsletters before generating a new one
+    _cleanup_old_newsletters(output_dir)
 
     today = datetime.now().strftime("%Y-%m-%d")
     output_filename = filename_template.format(date=today)
