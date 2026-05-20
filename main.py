@@ -43,7 +43,10 @@ def load_config(config_path: str = "config.yaml") -> dict:
 
 
 def get_scraper(
-    cinema_config: dict, tmdb_service: Optional[TMDBService] = None, page=None
+    cinema_config: dict,
+    tmdb_service: Optional[TMDBService] = None,
+    page=None,
+    threshold_year: int = 2010,
 ) -> Optional[BaseScraper]:
     cinema_type = cinema_config.get("type")
     scraper_class = SCRAPER_MAP.get(cinema_type)
@@ -55,6 +58,7 @@ def get_scraper(
     kwargs = {
         "cinema_name": cinema_config["name"],
         "url": cinema_config["url"],
+        "threshold_year": threshold_year,
     }
 
     if cinema_type in ("babylon", "bestofcinema") and tmdb_service:
@@ -209,7 +213,7 @@ def load_screenings_from_cache() -> Optional[list[Screening]]:
 
 async def scrape_cinema(cinema, tmdb_service, context, threshold_year: int = 2010):
     page = await context.new_page()
-    scraper = get_scraper(cinema, tmdb_service, page)
+    scraper = get_scraper(cinema, tmdb_service, page, threshold_year)
     if not scraper:
         await page.close()
         return []
