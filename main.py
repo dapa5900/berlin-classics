@@ -166,11 +166,10 @@ def _cleanup_old_newsletters(output_dir: str) -> None:
     if not output_path.exists():
         return
 
-    newsletter_files = sorted(output_path.glob("newsletter_*.html"), reverse=True)
-    if len(newsletter_files) > 1:
-        for old_file in newsletter_files[1:]:
-            old_file.unlink()
-            logger.info(f"Removed old newsletter: {old_file.name}")
+    newsletter_files = list(output_path.glob("newsletter_*.html"))
+    for old_file in newsletter_files:
+        old_file.unlink()
+        logger.info(f"Removed old newsletter: {old_file.name}")
 
 
 def save_screenings_to_cache(screenings: list[Screening]) -> None:
