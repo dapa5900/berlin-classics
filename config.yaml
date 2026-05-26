@@ -27,6 +27,11 @@ cinemas:
     type: "bestofcinema"
     google_maps_url: null
     title_filters: []
+  - name: "Open Air Cinema"
+    url: "https://openair-kino.net/category/berlin/"
+    type: "openair_kino"
+    google_maps_url: null
+    title_filters: []
 
 newsletter:
   classical_year_threshold: 2010

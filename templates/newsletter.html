@@ -401,7 +401,7 @@
                                            data-date="{{ screening.date.strftime('%Y-%m-%d') }}"
                                            data-time="{{ screening.date.strftime('%H:%M') }}"
                                            data-runtime="{{ screening.runtime }}"
-                                           data-cinema="{{ screening.cinema_name }}"
+                                            data-cinema="{{ screening.venue_name if screening.venue_name else screening.cinema_name }}"
                                            data-location="{{ cinema_config.cinemas|selectattr('name', 'equalto', screening.cinema_name)|map(attribute='google_maps_url')|first|default('') }}"
                                             data-url="{{ screening.url }}"
                                             data-tmdb-url="{{ screening.tmdb_url }}">

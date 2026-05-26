@@ -20,6 +20,7 @@ class Screening:
     tmdb_url: Optional[str] = None
     skip_year_filter: bool = False
     runtime: int = 0
+    venue_name: Optional[str] = None
 
 
 class BaseScraper:

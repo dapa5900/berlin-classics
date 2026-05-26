@@ -52,7 +52,7 @@ class TMDBService:
         cleaned = title.encode("ascii", "replace").decode("ascii")
         cleaned = re.sub(r"\s*\(.*?\)\s*", " ", cleaned)
         cleaned = re.sub(r"\s*LIVE\s*", " ", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"\s*-\s*.*$", "", cleaned)
+        cleaned = re.sub(r"(?<=\s)-\s.*$", "", cleaned)
         cleaned = re.sub(r"\s*Babylon\s*$", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"Greek Film Festival:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"Unsere Besten:\s*", "", cleaned, flags=re.IGNORECASE)

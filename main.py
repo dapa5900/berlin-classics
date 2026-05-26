@@ -16,6 +16,7 @@ from yaml import Loader
 from scrapers.babylon import BabylonScraper
 from scrapers.base import BaseScraper, Screening
 from scrapers.bestofcinema import BestOfCinemaScraper
+from scrapers.openair_kino import OpenAirKinoScraper
 from scrapers.zoo_palast import AstorScraper, ZooPalastScraper
 from services.newsletter import NewsletterGenerator
 from services.tmdb import TMDBService
@@ -34,6 +35,7 @@ SCRAPER_MAP = {
     "zoo_palast": ZooPalastScraper,
     "astor": AstorScraper,
     "bestofcinema": BestOfCinemaScraper,
+    "openair_kino": OpenAirKinoScraper,
 }
 
 
@@ -61,7 +63,7 @@ def get_scraper(
         "threshold_year": threshold_year,
     }
 
-    if cinema_type in ("babylon", "bestofcinema") and tmdb_service:
+    if cinema_type in ("babylon", "bestofcinema", "openair_kino") and tmdb_service:
         kwargs["tmdb_service"] = tmdb_service
     if cinema_type in ("zoo_palast", "astor") and page:
         kwargs["page"] = page
@@ -187,6 +189,7 @@ def save_screenings_to_cache(screenings: list[Screening]) -> None:
                 "tmdb_url": s.tmdb_url,
                 "runtime": s.runtime,
                 "skip_year_filter": s.skip_year_filter,
+                "venue_name": s.venue_name,
             }
         )
     CACHE_FILE.write_text(
@@ -213,6 +216,7 @@ def load_screenings_from_cache() -> Optional[list[Screening]]:
                     tmdb_url=item.get("tmdb_url"),
                     runtime=item.get("runtime"),
                     skip_year_filter=item.get("skip_year_filter", False),
+                    venue_name=item.get("venue_name"),
                 )
             )
         logger.info(f"Loaded {len(screenings)} screenings from cache")
@@ -238,7 +242,7 @@ async def scrape_cinema(cinema, tmdb_service, context, threshold_year: int = 201
         screenings = filter_screenings(screenings, title_filters)
         logger.info(f"After filtering: {len(screenings)} screenings")
 
-        skip_enriched = cinema.get("type") in ("babylon", "bestofcinema")
+        skip_enriched = cinema.get("type") in ("babylon", "bestofcinema", "openair_kino")
         screenings = await enrich_screenings(
             screenings, tmdb_service, skip_if_enriched=skip_enriched
         )

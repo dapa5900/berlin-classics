@@ -1,118 +1,76 @@
 # Agent Guidelines for Berlin Classics Newsletter
 
-## Project Overview
-
-This is a Python web scraping project that generates a weekly HTML newsletter of classic film screenings from Berlin cinemas (Babylon, Zoo Palast, Astor, Best of Cinema). It scrapes cinema websites, filters for films from 2010 or earlier (except Best of Cinema), and produces a newsletter using Jinja2 templates.
-
-## Build & Run Commands
-
-### Running the Project
-
-```bash
-python main.py
-```
-
-This reads `config.yaml`, scrapes all configured cinemas, filters for classical films, and outputs an HTML newsletter to the `output/` directory.
-
-### Dependencies
-
-Install with:
-```bash
-pip install -r requirements.txt
-```
-
-Required packages: `httpx`, `beautifulsoup4`, `lxml`, `jinja2`, `pyyaml`, `playwright`, `requests-cache`.
-
-### Testing
-
-To run tests, create a `tests/` directory and use `pytest`:
-
-```bash
-# Run all tests
-pytest tests/
-
-# Run a single test file
-pytest tests/test_scraper.py
-
-# Run a specific test function in a file
-pytest tests/test_scraper.py::test_year_extraction
-```
-
-### Code Quality Tools
-
-This project utilizes `ruff`, `black`, and `mypy` for code quality:
-
-```bash
-ruff check .               # Lint all files
-black .                    # Format all files
-mypy .                     # Type check (requires type annotations)
-```
-
-## Code Style Guidelines
-
-### Imports
-
-Standard library first, then third-party, then local. Use explicit relative imports for project modules.
-
-### Formatting
-
-- Use 4 spaces for indentation (no tabs)
-- Maximum line length: 100 characters
-- Use blank lines between top-level definitions (2 lines) and functions (1 line)
-- No trailing whitespace
-- Use meaningful variable names
-
-### Types & Data Structures
-
-- Use type hints for all function signatures and return types.
-- Use `Optional[X]` instead of `X | None` for Python < 3.10 compatibility.
-- Use `dataclasses` (preferably frozen) for structured data (e.g., `Screening`).
-
-### Naming Conventions
-
-- Classes: `PascalCase` (e.g., `BabylonScraper`, `NewsletterGenerator`)
-- Functions/variables: `snake_case` (e.g., `get_screenings`, `cinema_name`)
-- Constants: `UPPER_SNAKE_CASE` (e.g., `DAY_MAP`)
-- Private methods: prefix with underscore (e.g., `_rate_limit`)
-
-### Error Handling
-
-- Use `try/except` sparingly and catch specific exceptions.
-- Return `None` or a default value when appropriate rather than raising.
-- Log errors with descriptive messages including context (`logger.error(...)`).
-- Bare `except:` is discouraged; prefer `except SomeException:`.
-
-## Coding Standards for Agents
-
-1. **Source of Truth:** Treat data scraped directly from cinema websites as the primary source of truth for raw metadata (year, runtime, original title). Use TMDB primarily for enrichment (posters, IDs) and disambiguation.
-2. **Robustness:** If a scraping attempt fails, log a specific error and gracefully skip the item rather than crashing the orchestrator.
-3. **Original Titles:** When handling non-English titles in brackets (e.g., `[La verità]`), always extract the original title and prioritize it in TMDB searches to ensure accurate matching.
-4. **Immutability:** Use `dataclasses` with `frozen=True` for data transfer objects like `Screening`.
-
-## Project Structure
+## Run (Windows)
 
 ```
-.
-├── main.py              # Entry point, orchestrator
-├── config.yaml          # Cinema configurations
-├── requirements.txt     # Dependencies
-├── scrapers/            # Website scrapers
-│   ├── base.py          # BaseScraper, Screening dataclass
-│   ├── babylon.py       # Babylon-specific scraper
-│   ├── zoo_palast.py    # Zoo Palast scraper
-│   └── astor.py         # Astor scraper
-├── services/            # Business logic
-│   ├── newsletter.py    # HTML generation with Jinja2
-│   ├── poster_lookup.py # Movie poster fetching
-│   └── tmdb.py          # TMDBService - matching logic
-├── templates/           # Jinja2 templates
-│   └── newsletter.html  # Newsletter HTML template
-└── output/              # Generated newsletters
+call venv\Scripts\activate
+python main.py --no-cache          # fresh scrape, regenerates cache
+python main.py                     # use cache/screenings.json
+ruff check .                       # lint
+pytest tests/                      # verify
 ```
 
-## Adding a New Cinema
+Batch helpers: `run_fresh.bat`, `run_cached.bat`
 
-1. Create a new scraper class in `scrapers/` inheriting from `BaseScraper`.
-2. Implement `get_screenings() -> list[Screening]`.
-3. Add the cinema to `SCRAPER_MAP` in `main.py`.
-4. Add entry to `config.yaml` with unique `type` matching the map key.
+## Prerequisites
+
+- `TMDB_API_KEY` in `.env` (copy `.env.example` if available)
+- `venv/` activated — the venv is at the repo root
+- `requirements.txt` lists dependencies
+
+## Architecture
+
+`main.py` orchestrates: reads `config.yaml` → instantiates scrapers → enriches via TMDB → filters ≤ threshold_year → renders Jinja2 template → saves to `output/`.
+
+- `scrapers/base.py` — `BaseScraper`, `Screening` dataclass
+- `scrapers/<name>.py` — one scraper per cinema type
+- `services/tmdb.py` — TMDB lookup and title matching
+- `services/newsletter.py` — Jinja2 template rendering
+- `templates/newsletter.html` — HTML output + JS for calendar export / collapse
+- `cache/screenings.json` — cached scraped data (regenerated on `--no-cache`)
+
+## Screening dataclass fields
+
+```python
+Screening(
+    cinema_name: str,      # newsletter section group name (e.g. "Open Air Cinema")
+    movie_title: str,      # cleaned title from TMDB or source page
+    date: datetime,        # screening datetime
+    url: Optional[str],    # source page URL
+    year: Optional[int],   # movie release year from TMDB
+    poster_url: Optional[str],
+    tmdb_url: Optional[str],
+    skip_year_filter: bool = False,
+    runtime: int = 0,
+    venue_name: Optional[str],  # actual venue for calendar export
+)
+```
+
+`Screening` is a regular `@dataclass` (NOT frozen) — fields are mutated during TMDB enrichment.
+`venue_name` carries the actual venue; `cinema_name` is the section group. Template uses `screening.venue_name if screening.venue_name else screening.cinema_name`.
+
+## Adding a new scraper
+
+1. Create `scrapers/<name>.py` inheriting `BaseScraper`.
+2. Implement `async get_screenings() -> list[Screening]`.
+3. Register in `SCRAPER_MAP` in `main.py`.
+4. Add to `config.yaml` under `cinemas:` with matching `type`.
+5. If it needs TMDB enrichment, add its type to the `tmdb_service` check in `get_scraper()` (line ~66).
+6. If it already enriched titles (so `enrich_screenings` should skip it), add its type to the `skip_enriched` check in `scrape_cinema()` (line ~245).
+
+## Open Air Kino scraper gotchas
+
+- **Date regex**: must use `[\w.]+` (not `\w+`) to match abbreviated months like "Aug." that end in a period.
+- **Date/time source**: live in a `div.meta_kino` **previous sibling** of each `article`, not inside the article itself.
+- **German month names** must be mapped (Mär, Okt, Dez, etc.).
+- **TMDB lookup**: happens in the scraper's `get_screenings()`, NOT in `enrich_screenings()`. **Never pass `expected_year`** — screening dates don't correspond to movie release years. TMDB matching should rely on title similarity, with the threshold_year filter applied afterward.
+- **Compound words**: the TMDB `_clean_title` regex `(?<=\s)-\s.*$` uses a lookbehind to preserve compound words like "hai-alarm" (dash only removes content after a space-dash pattern).
+- Multi-cinema aggregator, not a single venue.
+
+## Cinema config fields
+
+- `name` — section title in newsletter
+- `url` — scraper source URL
+- `type` — maps to scraper class
+- `google_maps_url` — optional, shown in footer
+- `title_filters` — list of substrings to exclude from screenings
