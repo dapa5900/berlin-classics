@@ -150,6 +150,9 @@
             color: #D4AF37;
             transition: transform 0.2s ease;
             font-weight: 300;
+            width: 1.2em;
+            text-align: right;
+            flex-shrink: 0;
         }
         .cinema-screenings {
             display: grid;
@@ -193,10 +196,19 @@
             border-bottom: 1px solid rgba(212,175,55,0.3);
         }
         .card-date {
-            font-size: 0.8em;
+            font-size: 1em;
             color: #D4AF37;
             font-weight: 600;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .date-icon {
+            width: 1.1em;
+            height: 1.1em;
+            fill: #D4AF37;
+            flex-shrink: 0;
         }
         .poster-link {
             display: block;
@@ -246,10 +258,17 @@
             padding: 32px 20px;
         }
         .card-date {
-            font-size: 0.8em;
+            font-size: 1em;
             color: #D4AF37;
             font-weight: 600;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-checkbox {
+            display: flex;
+            align-items: center;
         }
         .card-checkbox input {
             width: 18px;
@@ -348,6 +367,11 @@
         @media (max-width: 600px) {
             body {
                 padding: 20px 15px;
+                font-size: 16px;
+                overflow-x: hidden;
+            }
+            * {
+                -webkit-tap-highlight-color: rgba(212,175,55,0.3);
             }
             h1 {
                 font-size: 2.2em;
@@ -367,7 +391,7 @@
             .screening-card {
                 flex-direction: column;
                 gap: 18px;
-                padding: 20px;
+                padding: 12px;
             }
             .poster-link {
                 width: 100%;
@@ -375,13 +399,27 @@
             }
             .poster, .poster-placeholder {
                 width: 100%;
-                height: 200px;
+                max-width: 180px;
+                height: auto;
+                aspect-ratio: 2/3;
             }
             .movie-title {
                 font-size: 1.25em;
             }
             .screening-details {
                 font-size: 0.9em;
+            }
+            .toggle-all-btn {
+                font-size: 0.8em;
+                padding: 12px 25px;
+            }
+            .export-btn-container {
+                left: auto;
+                right: 20px;
+            }
+            .card-checkbox input {
+                width: 24px;
+                height: 24px;
             }
         }
     </style>
@@ -395,7 +433,7 @@
         </header>
 
         <p style="text-align: center; margin: 20px 0;">
-            <button class="toggle-all-btn" onclick="toggleAll()">Alle expandieren / einklappen</button>
+            <button class="toggle-all-btn" onclick="toggleAll()">Alle ein-/ausklappen</button>
         </p>
 
         {% set grouped = {} %}
@@ -415,24 +453,30 @@
                     {% for screening in cinema_screenings|sort(attribute='date') %}
                         <article class="screening-card">
                             <div class="card-header">
-                                <div class="card-date">{{ screening.date.strftime('%a, %d.%m.%Y') }}</div>
+                                <div class="card-date">
+                                    <svg class="date-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                    </svg>
+                                    {{ screening.date.strftime('%a, %d.%m.%Y') }}
+                                </div>
                                 <div class="card-checkbox">
                                     <input type="checkbox" 
-                                           class="movie-select" 
-                                           data-title="{{ screening.movie_title }}"
-                                           data-year="{{ screening.year }}"
-                                           data-date="{{ screening.date.strftime('%Y-%m-%d') }}"
-                                           data-time="{{ screening.date.strftime('%H:%M') }}"
-                                           data-runtime="{{ screening.runtime }}"
-                                            data-cinema="{{ screening.venue_name if screening.venue_name else screening.cinema_name }}"
-                                           data-location="{{ cinema_config.cinemas|selectattr('name', 'equalto', screening.cinema_name)|map(attribute='google_maps_url')|first|default('') }}"
-                                            data-url="{{ screening.url }}"
-                                            data-tmdb-url="{{ screening.tmdb_url }}">
+                                            title="Für Kalender-Export markieren"
+                                            class="movie-select" 
+                                            data-title="{{ screening.movie_title }}"
+                                            data-year="{{ screening.year }}"
+                                            data-date="{{ screening.date.strftime('%Y-%m-%d') }}"
+                                            data-time="{{ screening.date.strftime('%H:%M') }}"
+                                            data-runtime="{{ screening.runtime }}"
+                                             data-cinema="{{ screening.venue_name if screening.venue_name else screening.cinema_name }}"
+                                            data-location="{{ cinema_config.cinemas|selectattr('name', 'equalto', screening.cinema_name)|map(attribute='google_maps_url')|first|default('') }}"
+                                             data-url="{{ screening.url }}"
+                                             data-tmdb-url="{{ screening.tmdb_url }}">
                                 </div>
                             </div>
                             
                             {% if screening.url %}
-                                <a href="{{ screening.url }}" target="_blank" class="poster-link">
+                                <a href="{{ screening.url }}" target="_blank" class="poster-link" title="Kino-Website aufrufen">
                             {% endif %}
                             {% if screening.poster_url %}
                                 <img src="{{ screening.poster_url }}" alt="{{ screening.movie_title }}" class="poster">
@@ -446,7 +490,7 @@
                             <div class="screening-info">
                                 <h3 class="movie-title">
                                     {% if screening.url %}
-                                        <a href="{{ screening.url }}" target="_blank">{{ screening.movie_title }}</a>
+                                        <a href="{{ screening.url }}" target="_blank" title="Kino-Website aufrufen">{{ screening.movie_title }}</a>
                                     {% else %}
                                         {{ screening.movie_title }}
                                     {% endif %}
@@ -460,7 +504,7 @@
                                     {% else %}
                                         {{ screening.date.strftime('%H:%M') }}{% if screening.runtime %} · {{ screening.runtime }} Min.{% endif %}
                                     {% endif %}
-                                    {% if screening.tmdb_url %} · <a href="{{ screening.tmdb_url }}" target="_blank" class="tmdb-link" title="Auf TMDB ansehen">TMDB</a>{% endif %}
+                                    {% if screening.tmdb_url %} · <a href="{{ screening.tmdb_url }}" target="_blank" class="tmdb-link" title="Filminfos auf TMDB ansehen">TMDB</a>{% endif %}
                                 </p>
                             </div>
                         </article>

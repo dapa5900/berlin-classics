@@ -3,7 +3,7 @@
 ## Run (Windows)
 
 ```
-call venv\Scripts\activate
+venv\Scripts\activate.ps1
 python main.py --no-cache          # fresh scrape, regenerates cache
 python main.py                     # use cache/screenings.json
 ruff check .                       # lint
@@ -12,11 +12,12 @@ pytest tests/                      # verify
 
 Batch helpers: `run_fresh.bat`, `run_cached.bat`
 
+> **Design-only changes**: Always use `python main.py` (cached). Fresh scraping takes ~20s and is unnecessary for HTML/CSS/template tweaks.
+
 ## Prerequisites
 
-- `TMDB_API_KEY` in `.env` (copy `.env.example` if available)
-- `venv/` activated — the venv is at the repo root
-- `requirements.txt` lists dependencies
+- `TMDB_API_KEY` in `.env` (create from `.env.example` if available)
+- Python 3.13+ — `requirements.txt` lists dependencies
 
 ## Architecture
 
@@ -53,10 +54,11 @@ Screening(
 
 1. Create `scrapers/<name>.py` inheriting `BaseScraper`.
 2. Implement `async get_screenings() -> list[Screening]`.
-3. Register in `SCRAPER_MAP` in `main.py`.
+3. Register in `SCRAPER_MAP` in `main.py:33`.
 4. Add to `config.yaml` under `cinemas:` with matching `type`.
-5. If it needs TMDB enrichment, add its type to the `tmdb_service` check in `get_scraper()` (line ~66).
-6. If it already enriched titles (so `enrich_screenings` should skip it), add its type to the `skip_enriched` check in `scrape_cinema()` (line ~245).
+5. If it needs TMDB enrichment, add its type to the `tmdb_service` check in `get_scraper()` at `main.py:68`.
+6. If it already enriched titles (so `enrich_screenings` should skip it), add its type to the `skip_enriched` check in `scrape_cinema()` at `main.py:251`.
+7. Steps 5 and 6 use the same list: `("babylon", "bestofcinema", "openair_kino")`.
 
 ## Open Air Kino scraper gotchas
 
