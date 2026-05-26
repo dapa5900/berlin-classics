@@ -421,6 +421,10 @@
                 width: 24px;
                 height: 24px;
             }
+            .break-after::after {
+                content: "\a";
+                white-space: pre;
+            }
         }
     </style>
 </head>
@@ -428,7 +432,7 @@
     <div class="container">
         <header>
             <h1>Berlin Classics</h1>
-            <p class="subtitle">Klassische Filme in Berliner Kinos</p>
+            <p class="subtitle">Klassische Filme <span class="break-after">in</span> Berliner Kinos</p>
             <p class="meta">Generiert am {{ generated_at.strftime('%d.%m.%Y um %H:%M') }}</p>
         </header>
 
