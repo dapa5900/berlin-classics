@@ -198,6 +198,16 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+        .poster-link {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            margin: 0 auto;
+            text-decoration: none !important;
+        }
+        .poster-link:hover, .poster-link:visited, .poster-link:active, .poster-link:focus {
+            text-decoration: none !important;
+        }
         .poster {
             width: 100%;
             max-width: 180px;
@@ -215,15 +225,25 @@
             width: 100%;
             max-width: 180px;
             aspect-ratio: 2/3;
-            background: linear-gradient(180deg, #1a1015 0%, #0d080c 100%);
             border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #5a5550;
-            font-size: 0.7em;
-            border: 1px dashed rgba(212,175,55,0.15);
             margin: 0 auto 15px auto;
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 1px #D4AF37;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .placeholder-text {
+            font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+            font-size: 1.15em;
+            font-weight: 600;
+            color: #0d080c;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+            line-height: 1.35;
+            padding: 32px 20px;
         }
         .card-date {
             font-size: 0.8em;
@@ -300,7 +320,6 @@
         .tmdb-link {
             color: #D4AF37;
             font-size: 0.95em;
-            text-decoration: underline;
         }
         .tmdb-link:hover {
             opacity: 0.8;
@@ -349,6 +368,10 @@
                 flex-direction: column;
                 gap: 18px;
                 padding: 20px;
+            }
+            .poster-link {
+                width: 100%;
+                max-width: 100%;
             }
             .poster, .poster-placeholder {
                 width: 100%;
@@ -409,12 +432,14 @@
                             </div>
                             
                             {% if screening.url %}
-                                <a href="{{ screening.url }}" target="_blank">
+                                <a href="{{ screening.url }}" target="_blank" class="poster-link">
                             {% endif %}
                             {% if screening.poster_url %}
                                 <img src="{{ screening.poster_url }}" alt="{{ screening.movie_title }}" class="poster">
                             {% else %}
-                                <div class="poster-placeholder"></div>
+                                <div class="poster-placeholder">
+                                    <span class="placeholder-text">BERLIN<br>CLASSICS</span>
+                                </div>
                             {% endif %}
                             {% if screening.url %}</a>{% endif %}
                             

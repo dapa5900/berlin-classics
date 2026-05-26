@@ -38,6 +38,8 @@ SCRAPER_MAP = {
     "openair_kino": OpenAirKinoScraper,
 }
 
+POSTER_CHECK_TTL = 86400  # 24 hours in seconds
+
 
 def load_config(config_path: str = "config.yaml") -> dict:
     with open(config_path, encoding="utf-8") as f:
@@ -103,20 +105,24 @@ async def _check_image_accessible(url: str) -> bool:
 async def _validate_and_fix_posters(
     screenings: list[Screening], tmdb_service: TMDBService
 ) -> list[Screening]:
-    fixed = 0
-    for screening in screenings:
+    async def check_one(screening: Screening) -> int:
         if not screening.poster_url:
-            continue
+            return 0
         if not await _check_image_accessible(screening.poster_url):
             logger.info(f"Stale poster for '{screening.movie_title}', re-fetching...")
             info = await tmdb_service.get_movie_info(screening.movie_title)
             if info and info[2]:
                 screening.poster_url = info[2]
-                fixed += 1
                 logger.info(f"  Fixed: {screening.poster_url}")
+                return 1
             else:
                 screening.poster_url = None
                 logger.warning(f"  Could not fix poster for '{screening.movie_title}'")
+                return 0
+        return 0
+
+    results = await asyncio.gather(*[check_one(s) for s in screenings])
+    fixed = sum(results)
     if fixed:
         logger.info(f"Fixed {fixed} stale poster(s)")
     return screenings
@@ -286,11 +292,17 @@ async def main_async():
     if not args.no_cache:
         cached = load_screenings_from_cache()
         if cached:
-            all_screenings = cached
-            logger.info(f"Using {len(all_screenings)} screenings from cache")
-            all_screenings = await _validate_and_fix_posters(
-                all_screenings, tmdb_service
-            )
+            cache_mtime = CACHE_FILE.stat().st_mtime
+            cache_age = (datetime.now() - datetime.fromtimestamp(cache_mtime)).total_seconds()
+            if cache_age < POSTER_CHECK_TTL:
+                all_screenings = cached
+                logger.info(f"Using {len(all_screenings)} screenings from cache (fresh, {cache_age/3600:.1f}h old)")
+            else:
+                logger.info(f"Cache is {cache_age/3600:.1f}h old, validating posters...")
+                all_screenings = cached
+                all_screenings = await _validate_and_fix_posters(
+                    all_screenings, tmdb_service
+                )
 
     if not all_screenings:
         logger.info("Cache not found or disabled, scraping fresh...")
