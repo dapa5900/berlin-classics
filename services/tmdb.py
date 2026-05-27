@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 import unicodedata
@@ -13,6 +14,32 @@ class TMDBService:
         self.api_key = api_key
         self.language = language
         self._cache: dict[str, Optional[Tuple[str, int, str, str, int]]] = {}
+        self._request_semaphore = asyncio.Semaphore(5)
+
+    async def _request_tmdb(
+        self, url: str, params: dict, max_retries: int = 3
+    ) -> httpx.Response:
+        for attempt in range(max_retries):
+            async with self._request_semaphore:
+                async with httpx.AsyncClient(timeout=10) as client:
+                    response = await client.get(url, params=params)
+                    if response.status_code == 429 and attempt < max_retries - 1:
+                        pass
+                    else:
+                        response.raise_for_status()
+                        return response
+            if response.status_code == 429 and attempt < max_retries - 1:
+                wait = 2 ** (attempt + 1)
+                logger.warning(
+                    f"TMDB 429 on {url.rsplit('/', 1)[-1]}, "
+                    f"retry {attempt + 1}/{max_retries} in {wait}s"
+                )
+                await asyncio.sleep(wait)
+        raise httpx.HTTPStatusError(
+            f"429 Too Many Requests after {max_retries} retries",
+            request=None,
+            response=response,
+        )
 
     def _is_multi_part_title(self, title: str) -> bool:
         keywords = ["trilogie", "trilogy", "marathon", r"\d+-hour", r"\d{1,2}\s*hour"]
@@ -80,6 +107,9 @@ class TMDBService:
         cleaned = re.sub(r"VIETNAM:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"THREE AMIGOS:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"INDOGERMAN FILMWEEK:\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"SPECIAL:\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"(Klimareihe|OPEN AIR|OFFENE LEINWAND|REEL LOVE):\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"MONDO VIDEO\s+(?:I+V?):\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"\s*\[.*?\]", "", cleaned)
         cleaned = re.sub(r"\s*with\s+Guests.*$", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"\s+", " ", cleaned)
@@ -89,11 +119,9 @@ class TMDBService:
         try:
             details_url = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
             params = {"api_key": self.api_key}
-            async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(details_url, params=params)
-                response.raise_for_status()
-                data = response.json()
-                return data.get("runtime")
+            response = await self._request_tmdb(details_url, params)
+            data = response.json()
+            return data.get("runtime")
         except Exception as e:
             logger.error(f"Error getting runtime for TMDB ID {tmdb_id}: {e}")
             return None
@@ -139,9 +167,7 @@ class TMDBService:
                         "query": original_cleaned,
                         "language": orig_lang,
                     }
-                    async with httpx.AsyncClient(timeout=10) as client:
-                        orig_response = await client.get(search_url, params=orig_params)
-                    orig_response.raise_for_status()
+                    orig_response = await self._request_tmdb(search_url, orig_params)
                     orig_data = orig_response.json()
 
                     if not orig_data.get("results"):
@@ -167,9 +193,7 @@ class TMDBService:
                         "query": cleaned_title,
                         "language": lang,
                     }
-                    async with httpx.AsyncClient(timeout=10) as client:
-                        response = await client.get(search_url, params=params)
-                    response.raise_for_status()
+                    response = await self._request_tmdb(search_url, params)
                     data = response.json()
 
                     if not data.get("results"):

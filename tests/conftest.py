@@ -11,6 +11,13 @@ def tmdb_service():
 
 
 @pytest.fixture
+def filmrausch_embedded_json():
+    return """
+var filmrausch_php_vars = {"cached_data":{"shows":[{"id":"1","movieId":"101","name":"TOP GUN","beginning":{"isoFull":"2026-06-01T20:15:00+02:00"},"duration":110},{"id":"2","movieId":"102","name":"SPECIAL: Klimareihe: EARTH'S GREATEST ENEMY","beginning":{"isoFull":"2026-06-02T18:30:00+02:00"},"duration":125}],"movies":{"101":{"name":"TOP GUN","title_orig":"Top Gun","released":"1986-08-07 00:00:00","duration":109,"largeImage":"https://media.kinoheld.de/poster-topgun.jpg"},"102":{"name":"SPECIAL: Klimareihe: EARTH'S GREATEST ENEMY","title_orig":"EARTH'S GREATEST ENEMY","released":"2025-01-01 00:00:00","duration":121,"largeImage":"https://media.kinoheld.de/poster-earth.jpg"}}}};
+""".strip()
+
+
+@pytest.fixture
 def sample_screenings():
     from scrapers.base import Screening
     from datetime import datetime

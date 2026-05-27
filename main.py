@@ -14,6 +14,7 @@ from playwright.async_api import async_playwright
 from scrapers.babylon import BabylonScraper
 from scrapers.base import BaseScraper, Screening
 from scrapers.bestofcinema import BestOfCinemaScraper
+from scrapers.filmrausch import FilmrauschScraper
 from scrapers.openair_kino import OpenAirKinoScraper
 from scrapers.zoo_palast import ZooPalastScraper
 from services.newsletter import NewsletterGenerator
@@ -41,6 +42,7 @@ SCRAPER_MAP = {
     "zoo_palast": ZooPalastScraper,
     "bestofcinema": BestOfCinemaScraper,
     "openair_kino": OpenAirKinoScraper,
+    "filmrausch": FilmrauschScraper,
 }
 
 
@@ -337,7 +339,7 @@ async def main_async():
     )
     parser.add_argument(
         "--cinema", type=str, default=None,
-        help="Scrape only this cinema type (babylon, zoo_palast, bestofcinema, openair_kino)"
+        help="Scrape only this cinema type (babylon, zoo_palast, bestofcinema, openair_kino, filmrausch)"
     )
     parser.add_argument(
         "--fast", action="store_true",
@@ -440,7 +442,7 @@ async def main_async():
     classical = _apply_year_filter(with_tmdb, threshold)
     logger.info(f"After year filter (≤{threshold}): {len(classical)} screenings")
 
-    classical.sort(key=lambda s: s.date)
+    classical.sort(key=lambda s: s.date.replace(tzinfo=None))
 
     _render_newsletter(classical, config, threshold)
 

@@ -1,7 +1,11 @@
 
+import json
+import re
+from datetime import datetime
+
 from main import filter_screenings, filter_no_tmdb
 from scrapers.base import Screening
-from datetime import datetime
+from scrapers.filmrausch import _clean_movie_title
 
 
 class TestFilterScreenings:
@@ -55,6 +59,49 @@ class TestFilterScreenings:
         screenings = [self._make_screening("")]
         result = filter_screenings(screenings, [])
         assert len(result) == 1
+
+
+class TestFilmrauschCleanTitle:
+    def test_regular_title_unchanged(self):
+        assert _clean_movie_title("TOP GUN") == "TOP GUN"
+        assert _clean_movie_title("ROYA") == "ROYA"
+
+    def test_strips_special_prefix(self):
+        assert _clean_movie_title("SPECIAL: Klimareihe: EARTH'S GREATEST ENEMY") == "EARTH'S GREATEST ENEMY"
+
+    def test_strips_open_air_prefix(self):
+        result = _clean_movie_title("SPECIAL: OPEN AIR: REEL LOVE: BRIDGET JONES - SCHOKOLADE ZUM FRÜHSTÜCK")
+        assert result == "BRIDGET JONES - SCHOKOLADE ZUM FRÜHSTÜCK"
+
+    def test_strips_offene_leinwand(self):
+        assert _clean_movie_title("SPECIAL: OFFENE LEINWAND: BABA KUSH") == "BABA KUSH"
+
+    def test_strips_mondo_video(self):
+        result = _clean_movie_title("SPECIAL: Mondo Video II: STORY OF RICKY (DF) & MEN BEHIND THE SUN")
+        assert result == "STORY OF RICKY (DF) & MEN BEHIND THE SUN"
+
+
+class TestFilmrauschJsonParsing:
+    def test_parse_embedded_json(self, filmrausch_embedded_json):
+        match = re.search(r"var filmrausch_php_vars\s*=\s*({.*?});", filmrausch_embedded_json, re.DOTALL)
+        assert match is not None
+        data = json.loads(match.group(1))
+        cached = data.get("cached_data", {})
+        shows = cached.get("shows", [])
+        movies = cached.get("movies", {})
+        assert len(shows) == 2
+        assert shows[0]["name"] == "TOP GUN"
+        assert shows[0]["beginning"]["isoFull"] == "2026-06-01T20:15:00+02:00"
+        assert movies["101"]["title_orig"] == "Top Gun"
+        assert movies["102"]["title_orig"] == "EARTH'S GREATEST ENEMY"
+
+    def test_clean_title_after_json_parse(self, filmrausch_embedded_json):
+        match = re.search(r"var filmrausch_php_vars\s*=\s*({.*?});", filmrausch_embedded_json, re.DOTALL)
+        data = json.loads(match.group(1))
+        shows = data["cached_data"]["shows"]
+        special_show = shows[1]
+        cleaned = _clean_movie_title(special_show["name"])
+        assert cleaned == "EARTH'S GREATEST ENEMY"
 
 
 class TestFilterNoTmdb:

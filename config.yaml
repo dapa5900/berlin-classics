@@ -27,6 +27,11 @@ cinemas:
     type: "openair_kino"
     google_maps_url: null
     title_filters: []
+  - name: "Filmrausch"
+    url: "https://www.filmrausch.de/"
+    type: "filmrausch"
+    google_maps_url: "https://maps.app.goo.gl/fNLxHN9BsZZjbsCK7"
+    title_filters: []
 
 newsletter:
   classical_year_threshold: 2010
