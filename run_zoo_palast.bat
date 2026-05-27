@@ -1,4 +1,3 @@
 @echo off
-call venv\Scripts\activate
-python main.py --cinema zoo_palast
+call scripts\run_timed.bat --cinema zoo_palast
 pause

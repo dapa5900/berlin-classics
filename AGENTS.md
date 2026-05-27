@@ -4,11 +4,13 @@
 
 ```powershell
 venv\Scripts\activate.ps1  # activate venv
-pytest tests/               # verify
+pytest tests/               # 39 tests, sync, no external deps
 ruff check .                # lint
 ```
 
 ## Batch shortcuts
+
+All `.bat` launchers delegate to `scripts\run_timed.bat` which shows elapsed time at the end.
 
 | Run... | Flag | Use when changing... |
 |---|---|---|
@@ -29,38 +31,36 @@ ruff check .                # lint
 <!-- markdownlint-disable-next-line MD028 -->
 > `--fast` loads enriched cache, re-applies title + year filters. **Great for config tweaks.**
 > **Caveat:** relaxing a title filter (including more movies) requires `run_process.bat` — enriched cache was saved with old filters applied.
+>
+> `--cinema X` loads other cinemas from cache, only scrapes the specified cinema fresh. `--re-enrich` re-runs TMDB on raw cache (clears TMDB memory cache).
 
 ## Key architecture
 
-- `main.py` orchestrates: scrape → title filters → TMDB enrichment (deduplicated by `movie_title+production_year+original_title`) → `filter_no_tmdb` → save enriched → year filter → render
-- `scrapers/` each return **raw** `Screening` objects. No TMDB calls in scrapers.
-- TMDB enrichment mutates `Screening` fields (title, year, poster, tmdb_url, runtime) **in place**.
-- `_clean_title` uses `unicodedata.normalize("NFD")` for umlauts (not ascii encode).
-- Zoo Palast scraper gets a Playwright `page` object; others use httpx+BeautifulSoup.
+- `main.py:30-35` maps config `type` → scraper class. All return raw `Screening` objects (no TMDB).
+- TMDB enrichment (`main.py:62-102`) deduplicates by `(movie_title, production_year, original_title)`, then mutates `Screening` in place.
+- `_clean_title` (`services/tmdb.py:52-82`) uses `unicodedata.normalize("NFD")`, strips common event prefixes/suffixes/regex patterns. Add new patterns here if obscure titles fail to match.
+- Template uses `venue_name if venue_name else cinema_name` for grouping (`templates/newsletter.html:475`). Open Air Kino sets `venue_name` per-article (actual cinema venue); all others leave it `None`.
 
-## Screening dataclass fields
+## Scraper gotchas
 
-`cinema_name` (section group), `movie_title`, `date`, `url`, `year` (set by TMDB), `poster_url`, `tmdb_url`, `skip_year_filter`, `runtime`, `venue_name` (actual venue, used in export), `production_year` (from scraper, used as TMDB `expected_year`), `original_title` (from scraper, e.g. Babylon bracket text).
-
-Template uses `venue_name ?? cinema_name`.
+- **Babylon**: Single HTTP request to programm page. Extracts from `.right-mix .mix-title` (full title), `.mix-introtext` (year + original title via `[...]` brackets), `.right-mix .runtime`. No subpage fetches.
+- **Zoo Palast**: Playwright-based. Intercepts API JSON response from `premiumkino.de/program` via network listener (not HTML). Then scrapes `/specials/filmklassiker` page separately to tag klassiker movies with `skip_year_filter=True`.
+- **Best of Cinema**: Fetches each movie subpage individually (like old Babylon). Gets `Produktionsjahr:` and `Laufflänge` regex from page text.
+- **Open Air Kino**: Date regex uses `[\w.]+` for abbreviated German months ("Aug.", "Mär"). Date is in `div.meta_kino` **previous sibling** of each `article`. Multi-cinema aggregator — `venue_name` is set to the actual venue per screening.
 
 ## TMDB matching order (in `services/tmdb.py`)
 
 1. Exact year match
-2. ±3yr, similarity ≥ 0.3 (uses `production_year`)
+2. ±3yr, similarity ≥ 0.3
 3. ±2yr, similarity ≥ 0.5
-4. Best similarity fallback
+4. Best similarity fallback (≥0.7 similarity, best year diff)
 
-## Scraper gotchas
-
-- **Open Air Kino**: date regex must use `[\w.]+` (abbreviated months like "Aug."). Date is in `div.meta_kino` **previous sibling** of each `article`. German month names (Mär, Okt, Dez). Multi-cinema aggregator.
-- **Babylon**: `original_title` comes from bracket content on detail page.
-- **Zoo Palast**: Playwright-based, needs page object.
+If `original_title` is provided (Babylon bracket text), a prioritized search by original title + exact year runs first.
 
 ## Test quirks
 
 - Tests are synchronous, no external deps. `conftest.py` provides `tmdb_service`, `sample_screenings`, `config_file` fixtures.
-- `locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")` is called at module level in `services/newsletter.py`.
+- `locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")` called at module level in `services/newsletter.py`.
 
 ## Prerequisites
 

@@ -1,4 +1,3 @@
 @echo off
-call venv\Scripts\activate
-python main.py --cinema openair_kino
+call scripts\run_timed.bat --cinema openair_kino
 pause

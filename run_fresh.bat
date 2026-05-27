@@ -1,4 +1,3 @@
 @echo off
-call venv\Scripts\activate
-python main.py --no-cache
+call scripts\run_timed.bat --no-cache
 pause

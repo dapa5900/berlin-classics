@@ -1,4 +1,3 @@
 @echo off
-call venv\Scripts\activate
-python main.py --cinema bestofcinema
+call scripts\run_timed.bat --cinema bestofcinema
 pause

@@ -1,4 +1,3 @@
 @echo off
-call venv\Scripts\activate
-python main.py --cinema babylon
+call scripts\run_timed.bat --cinema babylon
 pause

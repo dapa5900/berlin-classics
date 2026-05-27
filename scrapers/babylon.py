@@ -1,8 +1,6 @@
-import asyncio
 import logging
 import re
 from datetime import datetime
-from typing import Optional, Tuple
 
 from scrapers.base import BaseScraper, Screening
 
@@ -21,11 +19,15 @@ class BabylonScraper(BaseScraper):
         soup = await self.fetch_page(self.url)
         screenings = []
 
-        # Collect all basic screening info first
-        raw_events = []
         for event in soup.select(".mix"):
-            title_elem = event.select_one(".mix-title")
-            date_elem = event.select_one(".mix-date")
+            title_elem = event.select_one(".right-mix .mix-title")
+            if not title_elem:
+                title_elem = event.select_one(".mix-title")
+
+            date_elem = event.select_one(".right-mix .mix-date")
+            if not date_elem:
+                date_elem = event.select_one(".mix-date")
+
             link_elem = event.select_one("a")
             img_elem = event.select_one("img")
 
@@ -59,110 +61,59 @@ class BabylonScraper(BaseScraper):
             if img_elem:
                 poster_url = img_elem.get("src") or img_elem.get("data-src")
 
-            raw_events.append(
-                {
-                    "movie_title": movie_title,
-                    "date": screening_date,
-                    "url": url,
-                    "poster_url": poster_url,
-                }
-            )
+            introtext_elem = event.select_one(".mix-introtext")
+            production_year = None
+            original_title = None
+            if introtext_elem:
+                introtext = introtext_elem.get_text(strip=True)
 
-        # Parallel enrich all events with detail page data
-        semaphore = asyncio.Semaphore(5)
+                year_match = re.search(r",\s*(\d{4})", introtext)
+                if year_match:
+                    production_year = int(year_match.group(1))
 
-        async def fetch_detail(event):
-            async with semaphore:
-                movie_info = None
-                if event["url"]:
-                    movie_info = await self._fetch_movie_info(event["url"])
+                if not production_year:
+                    year_matches = re.finditer(
+                        r"\b(18\d{2}|19\d{2}|20\d{2})\b", introtext
+                    )
+                    for m in year_matches:
+                        potential_year = int(m.group(1))
+                        after_match = introtext[m.end() : m.end() + 10]
+                        if "Min" not in after_match and "min" not in after_match:
+                            production_year = potential_year
+                            break
 
-                movie_title = event["movie_title"]
-                production_year = None
-                runtime = 0
-                original_title = None
+                bracket_contents = re.findall(r"\[([^\]]+)\]", introtext)
+                for content in bracket_contents:
+                    content_clean = content.strip()
+                    if content_clean.lower() not in [
+                        "omeu",
+                        "omu",
+                        "ov",
+                        "df",
+                        "english ov",
+                    ]:
+                        original_title = content_clean
+                        break
 
-                if movie_info:
-                    movie_title = movie_info[0]
-                    production_year = movie_info[1]
-                    runtime = movie_info[2] if len(movie_info) > 2 else 0
-                    original_title = movie_info[3] if len(movie_info) > 3 else None
+            runtime_elem = event.select_one(".right-mix .runtime")
+            runtime = 0
+            if runtime_elem:
+                runtime_text = runtime_elem.get_text(strip=True)
+                runtime_match = re.search(r"(\d+)", runtime_text)
+                if runtime_match:
+                    runtime = int(runtime_match.group(1))
 
-                return Screening(
+            screenings.append(
+                Screening(
                     cinema_name=self.cinema_name,
                     movie_title=movie_title,
-                    date=event["date"],
-                    url=event["url"],
-                    poster_url=event["poster_url"],
+                    date=screening_date,
+                    url=url,
+                    poster_url=poster_url,
                     runtime=runtime,
                     production_year=production_year,
                     original_title=original_title,
                 )
+            )
 
-        tasks = [fetch_detail(event) for event in raw_events]
-        screenings = await asyncio.gather(*tasks)
-
-        return list(screenings)
-
-    async def _fetch_movie_info(
-        self, url: str
-    ) -> Optional[Tuple[str, Optional[int], int, Optional[str]]]:
-        soup = await self.fetch_page(url)
-        if not soup:
-            return None
-
-        page_text = soup.get_text()
-
-        # 1. Year: look for 4 digits that aren't part of a duration or range
-        # Prioritize 4 digits that are clearly a year
-        year = None
-        year_match = re.search(r",\s*(\d{4})", page_text)
-        if year_match:
-            year = int(year_match.group(1))
-
-        if not year:
-            # Fallback: look for 4 digits that are not immediately followed by "Min"
-            year_matches = re.finditer(r"\b(18\d{2}|19\d{2}|20\d{2})\b", page_text)
-            for match in year_matches:
-                potential_year = int(match.group(1))
-                # Check next word is not "Min"
-                after_match = page_text[match.end() : match.end() + 10]
-                if "Min" not in after_match:
-                    year = potential_year
-                    break
-
-        # 2. Runtime
-        runtime = 0
-        runtime_match = re.search(r",\s*(\d+)\s*Min", page_text)
-        if not runtime_match:
-            runtime_match = re.search(r"(\d+)\s*Min", page_text)
-        if runtime_match:
-            runtime = int(runtime_match.group(1))
-
-        # 3. Original Title (ignore language/format tags)
-        original_title = None
-        # Get all bracketed contents
-        bracket_contents = re.findall(r"\[([^\]]+)\]", page_text)
-        for content in bracket_contents:
-            content_clean = content.strip()
-            # Ignore common language/format tags
-            if content_clean.lower() not in ["omeu", "omu", "ov", "df", "english ov"]:
-                original_title = content_clean
-                break
-
-        title_tag = soup.find("title")
-        if title_tag:
-            title_text = title_tag.get_text(strip=True)
-            if " - " in title_text:
-                return (
-                    title_text.split(" - ")[-1].strip(),
-                    year,
-                    runtime,
-                    original_title,
-                )
-
-        title_elem = soup.select_one("h1")
-        if title_elem:
-            return (title_elem.get_text(strip=True), year, runtime, original_title)
-
-        return None
+        return screenings

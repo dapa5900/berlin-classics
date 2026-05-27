@@ -1,4 +1,3 @@
 @echo off
-call venv\Scripts\activate
-python main.py --fast
+call scripts\run_timed.bat --fast
 pause
