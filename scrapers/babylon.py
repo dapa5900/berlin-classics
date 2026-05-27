@@ -6,6 +6,48 @@ from scrapers.base import BaseScraper, Screening
 
 logger = logging.getLogger(__name__)
 
+# Override mappings for festival categories where the display name
+# does not match the actual title prefix on the page.
+FESTIVAL_PREFIX_OVERRIDES = {
+    "cat-DEFA-80": "80 Jahre DEFA: ",
+}
+
+
+def _strip_festival_prefix(movie_title: str, event) -> str:
+    cat_classes_raw = event.get("class", "")
+    if isinstance(cat_classes_raw, list):
+        cat_classes_raw = " ".join(cat_classes_raw)
+    cat_classes = [c for c in cat_classes_raw.split() if c.startswith("cat-")]
+    if not cat_classes:
+        return movie_title
+    cat_slug = cat_classes[0]
+
+    # Explicit overrides first
+    if cat_slug in FESTIVAL_PREFIX_OVERRIDES:
+        prefix = FESTIVAL_PREFIX_OVERRIDES[cat_slug]
+        if movie_title.lower().startswith(prefix.lower()):
+            return movie_title[len(prefix):].strip()
+        return movie_title
+
+    # Auto-detect for festival sections using the category link URL
+    cat_link = event.select_one(".mix-category a")
+    if not cat_link:
+        return movie_title
+    cat_url = cat_link.get("href", "")
+
+    if "/festivals/" not in cat_url:
+        return movie_title
+
+    cat_name = cat_link.get_text(strip=True)
+    if ": " in cat_name:
+        prefix = cat_name.split(":")[0].strip() + ": "
+    else:
+        prefix = cat_name.strip() + ": "
+
+    if movie_title.lower().startswith(prefix.lower()):
+        return movie_title[len(prefix):].strip()
+    return movie_title
+
 
 class BabylonScraper(BaseScraper):
     def __init__(
@@ -37,6 +79,7 @@ class BabylonScraper(BaseScraper):
             movie_title = title_elem.get_text(strip=True)
             if not movie_title:
                 movie_title = event.get("data-title", "")
+            movie_title = _strip_festival_prefix(movie_title, event)
 
             date_str = date_elem.get_text(strip=True)
 

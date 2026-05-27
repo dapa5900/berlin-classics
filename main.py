@@ -21,10 +21,19 @@ from services.tmdb import TMDBService
 
 load_dotenv()
 
+LOG_DIR = Path("logs")
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
+LOG_DIR.mkdir(exist_ok=True)
+file_handler = logging.FileHandler(
+    str(LOG_DIR / "latest_run.log"), mode="w", encoding="utf-8"
+)
+file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+logging.getLogger().addHandler(file_handler)
+
 logger = logging.getLogger(__name__)
 
 SCRAPER_MAP = {
