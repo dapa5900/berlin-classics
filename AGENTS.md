@@ -10,7 +10,7 @@ ruff check .                                          # lint (not via python -m)
 
 ## Run modes
 
-All `.bat` files delegate to `scripts\run_timed.bat` which logs elapsed time.
+All `.bat` files delegate to `scripts\run_timed.bat` which activates venv, runs `python main.py %*`, logs elapsed time.
 
 | Command | Effect |
 |---|---|
@@ -27,6 +27,12 @@ All `.bat` files delegate to `scripts\run_timed.bat` which logs elapsed time.
 **`--re-enrich`**: clears TMDB memory cache, re-runs TMDB on raw cache — use when `_clean_title` pattern changes or title filters change.
 
 **Live at**: `https://dapa5900.github.io/berlin-classics/`
+
+## Template
+
+- Single source: `templates/newsletter.html` — Jinja2 template with inline CSS/JS (no external files or framework).
+- Theme: gold (`#D4AF37`, `#B8860B`) on dark (`#0d080c`) background.
+- After editing template, re-run any `.bat` to regenerate `output/newsletter_*.html`.
 
 ## Pipeline (two-level cache)
 
@@ -67,7 +73,7 @@ scrape → cache/screenings.json → title filters → TMDB enrich → filter_no
 
 ## Setup
 
-- `TMDB_API_KEY` in `.env`
+- `TMDB_API_KEY` in `.env` (create from scratch, no template file)
 - Python 3.13+, `pip install -r requirements.txt`
 - `playwright install chromium` after pip install
 - `cache/`, `output/`, `venv/`, `logs/` in `.gitignore`
