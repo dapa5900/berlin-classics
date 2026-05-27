@@ -38,10 +38,10 @@ def sample_screenings():
             runtime=154,
         ),
         Screening(
-            cinema_name="Astor",
+            cinema_name="Best of Cinema",
             movie_title="Blade Runner 2049",
             date=datetime(2026, 5, 22, 21, 0),
-            url="https://berlin.premiumkino.de/film/blade-runner-2049",
+            url="https://www.bestofcinema.de/film/blade-runner-2049",
             year=2017,
             poster_url=None,
             tmdb_url="https://www.themoviedb.org/movie/335984",

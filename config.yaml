@@ -17,11 +17,7 @@ cinemas:
     type: "zoo_palast"
     google_maps_url: "https://maps.app.goo.gl/2LVqzeNwsweC1Fu57"
     title_filters: []
-  - name: "Astor Film Lounge"
-    url: "https://berlin.premiumkino.de/programm"
-    type: "astor"
-    google_maps_url: "https://maps.app.goo.gl/vND4S4on95jzCAXM7"
-    title_filters: []
+
   - name: "Best of Cinema"
     url: "https://www.bestofcinema.de/"
     type: "bestofcinema"

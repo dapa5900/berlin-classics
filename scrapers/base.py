@@ -21,6 +21,7 @@ class Screening:
     skip_year_filter: bool = False
     runtime: int = 0
     venue_name: Optional[str] = None
+    production_year: Optional[int] = None
 
 
 class BaseScraper:

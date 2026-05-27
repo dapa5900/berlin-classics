@@ -1,5 +1,6 @@
 import logging
 import re
+import unicodedata
 from typing import Optional, Tuple
 
 import httpx
@@ -49,7 +50,8 @@ class TMDBService:
         return 0.0
 
     def _clean_title(self, title: str) -> str:
-        cleaned = title.encode("ascii", "replace").decode("ascii")
+        cleaned = unicodedata.normalize("NFD", title)
+        cleaned = "".join(c for c in cleaned if not unicodedata.combining(c))
         cleaned = re.sub(r"\s*\(.*?\)\s*", " ", cleaned)
         cleaned = re.sub(r"\s*LIVE\s*", " ", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"(?<=\s)-\s.*$", "", cleaned)
@@ -180,6 +182,28 @@ class TMDBService:
                             if year == expected_year:
                                 matched_movie = m
                                 break
+
+                        # 1.5. Extended year match (±3 years, lower similarity threshold)
+                        if not matched_movie:
+                            for m in results:
+                                release_date = m.get("release_date", "")
+                                year = int(release_date[:4]) if release_date else None
+                                tmdb_title = m.get("title", "")
+                                title_similarity = self._calculate_title_similarity(
+                                    cleaned_title, tmdb_title
+                                )
+                                if (
+                                    year
+                                    and abs(year - expected_year) <= 3
+                                    and title_similarity >= 0.3
+                                ):
+                                    matched_movie = m
+                                    logger.info(
+                                        f"  MATCH (±3yr): {tmdb_title} ({year}), "
+                                        f"similarity={title_similarity:.2f}, "
+                                        f"year_diff={abs(year - expected_year)}"
+                                    )
+                                    break
 
                         # 2. Similarity/Year fallback
                         if not matched_movie:

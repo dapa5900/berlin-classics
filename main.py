@@ -17,7 +17,7 @@ from scrapers.babylon import BabylonScraper
 from scrapers.base import BaseScraper, Screening
 from scrapers.bestofcinema import BestOfCinemaScraper
 from scrapers.openair_kino import OpenAirKinoScraper
-from scrapers.zoo_palast import AstorScraper, ZooPalastScraper
+from scrapers.zoo_palast import ZooPalastScraper
 from services.newsletter import NewsletterGenerator
 from services.tmdb import TMDBService
 
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 SCRAPER_MAP = {
     "babylon": BabylonScraper,
     "zoo_palast": ZooPalastScraper,
-    "astor": AstorScraper,
+
     "bestofcinema": BestOfCinemaScraper,
     "openair_kino": OpenAirKinoScraper,
 }
@@ -67,7 +67,7 @@ def get_scraper(
 
     if cinema_type in ("babylon", "bestofcinema", "openair_kino") and tmdb_service:
         kwargs["tmdb_service"] = tmdb_service
-    if cinema_type in ("zoo_palast", "astor") and page:
+    if cinema_type == "zoo_palast" and page:
         kwargs["page"] = page
 
     return scraper_class(**kwargs)
@@ -142,7 +142,9 @@ async def enrich_screenings(
             screening.movie_title
         )
         info = await tmdb_service.get_movie_info(
-            screening.movie_title, keep_original_title=keep_original_title
+            screening.movie_title,
+            expected_year=screening.production_year,
+            keep_original_title=keep_original_title,
         )
         if info:
             tmdb_title, tmdb_year, tmdb_poster, tmdb_url, runtime = info
@@ -195,6 +197,7 @@ def save_screenings_to_cache(screenings: list[Screening]) -> None:
                 "tmdb_url": s.tmdb_url,
                 "runtime": s.runtime,
                 "skip_year_filter": s.skip_year_filter,
+                "production_year": s.production_year,
                 "venue_name": s.venue_name,
             }
         )
@@ -222,6 +225,7 @@ def load_screenings_from_cache() -> Optional[list[Screening]]:
                     tmdb_url=item.get("tmdb_url"),
                     runtime=item.get("runtime"),
                     skip_year_filter=item.get("skip_year_filter", False),
+                    production_year=item.get("production_year"),
                     venue_name=item.get("venue_name"),
                 )
             )
@@ -267,6 +271,13 @@ async def main_async():
     parser.add_argument(
         "--no-cache", action="store_true", help="Force fresh scraping, ignore cache"
     )
+    parser.add_argument(
+        "--re-enrich", action="store_true", help="Re-run TMDB enrichment on cached screenings"
+    )
+    parser.add_argument(
+        "--cinema", type=str, default=None,
+        help="Scrape only this cinema type (babylon, zoo_palast, bestofcinema, openair_kino)"
+    )
     args = parser.parse_args()
 
     logger.info("Starting Berlin Classics Newsletter generation")
@@ -287,6 +298,47 @@ async def main_async():
 
     tmdb_service = TMDBService(api_key=api_key, language=language)
 
+    if args.re_enrich:
+        logger.info("Re-enriching cached screenings...")
+        cached = load_screenings_from_cache()
+        if not cached:
+            logger.error("No cached screenings found for re-enrichment")
+            return
+        tmdb_service._cache.clear()
+        all_screenings = await enrich_screenings(cached, tmdb_service)
+        save_screenings_to_cache(all_screenings)
+        logger.info(f"Re-enrichment complete: {len(all_screenings)} screenings")
+        all_screenings.sort(key=lambda s: s.date)
+
+        output_config = config.get("output", {})
+        output_dir = output_config.get("directory", "output")
+        filename_template = output_config.get("filename_template", "newsletter_{date}.html")
+        _cleanup_old_newsletters(output_dir)
+        today = datetime.now().strftime("%Y-%m-%d")
+        output_filename = filename_template.format(date=today)
+        output_path = Path(output_dir) / output_filename
+        cinema_config = {"cinemas": []}
+        cinemas_for_newsletter = config.get("cinemas", [])
+        if args.cinema:
+            cinemas_for_newsletter = [c for c in cinemas_for_newsletter if c.get("type") == args.cinema]
+        for cinema in cinemas_for_newsletter:
+            cinema_config["cinemas"].append(
+                {
+                    "name": cinema["name"],
+                    "url": cinema["url"],
+                    "google_maps_url": cinema.get("google_maps_url"),
+                }
+            )
+        generator = NewsletterGenerator()
+        generator.generate(
+            screenings=all_screenings,
+            output_path=str(output_path),
+            threshold_year=threshold,
+            cinema_config=cinema_config,
+        )
+        logger.info(f"Newsletter generated with {len(all_screenings)} screenings")
+        return
+
     all_screenings = []
 
     if not args.no_cache:
@@ -304,15 +356,43 @@ async def main_async():
                     all_screenings, tmdb_service
                 )
 
-    if not all_screenings:
+    if args.cinema:
+        logger.info(f"Scraping only: {args.cinema}")
+        cinema_type_to_name = {c["type"]: c["name"] for c in config.get("cinemas", [])}
+        cinema_name = cinema_type_to_name.get(args.cinema, args.cinema)
+        if not args.no_cache:
+            cached = load_screenings_from_cache()
+            if cached:
+                all_screenings = [s for s in cached if s.cinema_name != cinema_name]
+                logger.info(f"Loaded {len(all_screenings)} screenings from cache (excluding {cinema_name})")
+            else:
+                logger.warning("No cache found, will scrape only the selected cinema")
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context()
+            cinemas_to_scrape = [c for c in config.get("cinemas", []) if c.get("type") == args.cinema]
+            if not cinemas_to_scrape:
+                logger.error(f"No cinema found with type '{args.cinema}'")
+                await browser.close()
+                return
+            tasks = [
+                scrape_cinema(cinema, tmdb_service, context, threshold)
+                for cinema in cinemas_to_scrape
+            ]
+            results = await asyncio.gather(*tasks)
+            for screenings in results:
+                all_screenings.extend(screenings)
+            await browser.close()
+    elif not all_screenings:
         logger.info("Cache not found or disabled, scraping fresh...")
+        cinemas_to_scrape = config.get("cinemas", [])
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context()
 
             tasks = [
                 scrape_cinema(cinema, tmdb_service, context, threshold)
-                for cinema in config.get("cinemas", [])
+                for cinema in cinemas_to_scrape
             ]
             results = await asyncio.gather(*tasks)
             for screenings in results:
@@ -337,7 +417,10 @@ async def main_async():
     output_path = Path(output_dir) / output_filename
 
     cinema_config = {"cinemas": []}
-    for cinema in config.get("cinemas", []):
+    cinemas_for_newsletter = config.get("cinemas", [])
+    if args.cinema:
+        cinemas_for_newsletter = [c for c in cinemas_for_newsletter if c.get("type") == args.cinema]
+    for cinema in cinemas_for_newsletter:
         cinema_config["cinemas"].append(
             {
                 "name": cinema["name"],

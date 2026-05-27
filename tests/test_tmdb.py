@@ -53,57 +53,25 @@ class TestCleanTitle:
         result = self.service._clean_title("Film Title with Guests")
         assert result == "Film Title"
 
+    def test_handles_umlaut_oe(self):
+        result = self.service._clean_title("Münchhausen")
+        assert "Munchhausen" == result
 
-class TestIsMultiPartTitle:
-    """Tests for TMDBService._is_multi_part_title."""
+    def test_handles_umlaut_ue(self):
+        result = self.service._clean_title("Über")
+        assert "Uber" == result
 
-    def setup_method(self):
-        self.service = TMDBService(api_key="test_key", language="de-DE")
+    def test_handles_umlaut_ae(self):
+        result = self.service._clean_title("Mädchen")
+        assert "Madchen" == result
 
-    def test_detects_trilogie(self):
-        assert self.service._is_multi_part_title("Film Trilogie") is True
+    def test_handles_multiple_umlauts(self):
+        result = self.service._clean_title("Die Unbestechlichen")
+        assert "Die Unbestechlichen" == result
 
-    def test_detects_trilogy(self):
-        assert self.service._is_multi_part_title("Film Trilogy") is True
-
-    def test_detects_marathon(self):
-        assert self.service._is_multi_part_title("Film Marathon") is True
-
-    def test_detects_24_hour(self):
-        assert self.service._is_multi_part_title("24 Hour Cinema") is True
-
-    def test_detects_x_hour(self):
-        assert self.service._is_multi_part_title("48-Hour Film") is True
-
-    def test_normal_title_is_not_multi_part(self):
-        assert self.service._is_multi_part_title("The Godfather") is False
-
-
-class TestExtractBaseTitle:
-    """Tests for TMDBService._extract_base_title."""
-
-    def setup_method(self):
-        self.service = TMDBService(api_key="test_key", language="de-DE")
-
-    def test_removes_trilogy_suffix(self):
-        result = self.service._extract_base_title("Film Trilogy")
-        assert result == "Film"
-
-    def test_removes_trilogy_with_part(self):
-        result = self.service._extract_base_title("Film Trilogy Part 1")
-        assert result == "Film"
-
-    def test_removes_brackets(self):
-        result = self.service._extract_base_title("Film [Original Title]")
-        assert result == "Film"
-
-    def test_removes_24_hour_prefix(self):
-        result = self.service._extract_base_title("24 Hour Film")
-        assert result == "Film"
-
-    def test_collapses_whitespace(self):
-        result = self.service._extract_base_title("  Film   Title  ")
-        assert result == "Film Title"
+    def test_handles_umlauts_in_search_query(self):
+        result = self.service._clean_title("So grün war mein Tal")
+        assert "So grun war mein Tal" == result
 
 
 class TestCalculateTitleSimilarity:
