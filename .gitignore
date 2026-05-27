@@ -5,3 +5,4 @@ output/
 .ruff_cache/
 *.pyc
 .env
+logs/
