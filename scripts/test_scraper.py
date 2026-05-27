@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-import re
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)

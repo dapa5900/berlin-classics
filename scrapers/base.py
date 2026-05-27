@@ -1,5 +1,4 @@
 import asyncio
-import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -22,6 +21,7 @@ class Screening:
     runtime: int = 0
     venue_name: Optional[str] = None
     production_year: Optional[int] = None
+    original_title: Optional[str] = None
 
 
 class BaseScraper:
@@ -29,11 +29,9 @@ class BaseScraper:
         self,
         cinema_name: str,
         url: str,
-        threshold_year: int = 2010,
     ):
         self.cinema_name = cinema_name
         self.url = url
-        self.threshold_year = threshold_year
         self._last_request_time: Optional[datetime] = None
 
     async def get_screenings(self) -> list[Screening]:

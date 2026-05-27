@@ -1,7 +1,5 @@
-import tempfile
 from pathlib import Path
 
-import yaml
 
 from main import load_config
 

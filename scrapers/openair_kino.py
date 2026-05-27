@@ -5,7 +5,6 @@ from typing import Optional
 
 from bs4 import Tag
 from scrapers.base import BaseScraper, Screening
-from services.tmdb import TMDBService
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +14,8 @@ class OpenAirKinoScraper(BaseScraper):
         self,
         cinema_name: str,
         url: str,
-        tmdb_service: Optional[TMDBService] = None,
-        threshold_year: int = 2010,
     ):
-        super().__init__(cinema_name, url, threshold_year)
-        self.tmdb_service = tmdb_service
+        super().__init__(cinema_name, url)
 
     async def get_screenings(self) -> list[Screening]:
         soup = await self.fetch_page(self.url)
@@ -41,42 +37,12 @@ class OpenAirKinoScraper(BaseScraper):
                 continue
             seen_titles.add(key)
 
-            title = screening.movie_title
-            year = screening.year
-            poster_url = screening.poster_url
-            runtime = screening.runtime
-            tmdb_url = screening.tmdb_url
-
-            if self.tmdb_service and title:
-                keep_original_title = self.tmdb_service._is_multi_part_title(title)
-                tmdb_info = await self.tmdb_service.get_movie_info(
-                    title, keep_original_title=keep_original_title
-                )
-                if tmdb_info and len(tmdb_info) == 5:
-                    tmdb_title, tmdb_year, tmdb_poster, tmdb_url, tmdb_runtime = tmdb_info
-                    if not keep_original_title and tmdb_title:
-                        title = tmdb_title
-                    if tmdb_year:
-                        year = tmdb_year
-                    if tmdb_poster:
-                        poster_url = tmdb_poster
-                    if tmdb_runtime:
-                        runtime = tmdb_runtime
-
-            if year and year > self.threshold_year:
-                continue
-
             screenings.append(
                 Screening(
                     cinema_name=self.cinema_name,
-                    movie_title=title,
+                    movie_title=screening.movie_title,
                     date=screening.date,
                     url=screening.url,
-                    year=year,
-                    poster_url=poster_url,
-                    tmdb_url=tmdb_url,
-                    runtime=runtime,
-                    skip_year_filter=False,
                     venue_name=screening.venue_name,
                 )
             )

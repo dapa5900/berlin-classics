@@ -21,20 +21,16 @@ class ZooPalastScraper(BaseScraper):
         cinema_name: str,
         url: str,
         page: Page,
-        threshold_year: int,
     ):
         super().__init__(cinema_name, url)
         self.page = page
         self._cinema_domain = "zoopalast.premiumkino.de"
-        self.threshold_year = threshold_year
 
     async def get_screenings(self) -> list[Screening]:
         program_data = await self._fetch_program_api()
         if not program_data:
             return []
-        return self._extract_classic_screenings(
-            program_data, self.cinema_name, self.threshold_year
-        )
+        return self._extract_classic_screenings(program_data, self.cinema_name)
 
     async def _fetch_program_api(self) -> Optional[dict]:
         program_data: dict = {}
@@ -109,7 +105,7 @@ class ZooPalastScraper(BaseScraper):
         return program_data
 
     def _extract_classic_screenings(
-        self, program_data: dict, cinema_name: str, threshold_year: int
+        self, program_data: dict, cinema_name: str
     ) -> list[Screening]:
         screenings = []
 
@@ -130,8 +126,6 @@ class ZooPalastScraper(BaseScraper):
             movie_slug = movie.get("slug", "")
 
             is_klassiker = movie_slug in klassiker_slugs
-            if not is_klassiker and year > threshold_year:
-                continue
 
             title = movie.get("name", "Unknown")
             begin = perf.get("begin", "")

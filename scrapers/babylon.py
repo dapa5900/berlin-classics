@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Optional, Tuple
 
 from scrapers.base import BaseScraper, Screening
-from services.tmdb import TMDBService
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +14,8 @@ class BabylonScraper(BaseScraper):
         self,
         cinema_name: str,
         url: str,
-        tmdb_service: Optional[TMDBService] = None,
-        threshold_year: int = 2010,
     ):
-        super().__init__(cinema_name, url, threshold_year)
-        self.tmdb_service = tmdb_service
+        super().__init__(cinema_name, url)
 
     async def get_screenings(self) -> list[Screening]:
         soup = await self.fetch_page(self.url)
@@ -72,75 +68,41 @@ class BabylonScraper(BaseScraper):
                 }
             )
 
-        # Parallel enrich all events
-        semaphore = asyncio.Semaphore(5)  # Max 5 concurrent requests
+        # Parallel enrich all events with detail page data
+        semaphore = asyncio.Semaphore(5)
 
-        async def fetch_and_enrich(event):
+        async def fetch_detail(event):
             async with semaphore:
                 movie_info = None
                 if event["url"]:
                     movie_info = await self._fetch_movie_info(event["url"])
 
                 movie_title = event["movie_title"]
-                babylon_year = None
+                production_year = None
                 runtime = 0
-                babylon_original_title = None
+                original_title = None
 
                 if movie_info:
                     movie_title = movie_info[0]
-                    babylon_year = movie_info[1]
+                    production_year = movie_info[1]
                     runtime = movie_info[2] if len(movie_info) > 2 else 0
-                    babylon_original_title = (
-                        movie_info[3] if len(movie_info) > 3 else None
-                    )
-
-                # TMDB Lookup
-                tmdb_url = None
-                year = babylon_year
-                poster_url = event["poster_url"]
-                keep_original_title = False
-
-                if self.tmdb_service and movie_title:
-                    keep_original_title = self.tmdb_service._is_multi_part_title(
-                        movie_title
-                    )
-                    tmdb_info = await self.tmdb_service.get_movie_info(
-                        movie_title,
-                        babylon_year,
-                        keep_original_title,
-                        babylon_original_title,
-                    )
-                    if tmdb_info and len(tmdb_info) == 5:
-                        tmdb_title, tmdb_year, tmdb_poster, tmdb_url, tmdb_runtime = (
-                            tmdb_info
-                        )
-                        if not keep_original_title and tmdb_title:
-                            movie_title = tmdb_title
-                        if not babylon_year and tmdb_year:
-                            year = tmdb_year
-                        if tmdb_poster:
-                            poster_url = tmdb_poster
-                        if not runtime and tmdb_runtime:
-                            runtime = tmdb_runtime
+                    original_title = movie_info[3] if len(movie_info) > 3 else None
 
                 return Screening(
                     cinema_name=self.cinema_name,
                     movie_title=movie_title,
                     date=event["date"],
                     url=event["url"],
-                    poster_url=poster_url,
-                    year=year,
-                    tmdb_url=tmdb_url,
+                    poster_url=event["poster_url"],
                     runtime=runtime,
+                    production_year=production_year,
+                    original_title=original_title,
                 )
 
-        tasks = [fetch_and_enrich(event) for event in raw_events]
+        tasks = [fetch_detail(event) for event in raw_events]
         screenings = await asyncio.gather(*tasks)
 
-        filtered = [
-            s for s in screenings if s.year is None or s.year <= self.threshold_year
-        ]
-        return list(filtered)
+        return list(screenings)
 
     async def _fetch_movie_info(
         self, url: str

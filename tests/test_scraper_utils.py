@@ -1,4 +1,3 @@
-import pytest
 
 from main import filter_screenings, filter_no_tmdb
 from scrapers.base import Screening

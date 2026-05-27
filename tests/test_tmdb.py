@@ -1,4 +1,3 @@
-import pytest
 
 from services.tmdb import TMDBService
 

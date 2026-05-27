@@ -1,10 +1,8 @@
 import logging
 import re
 from datetime import datetime
-from typing import Optional
 
 from scrapers.base import BaseScraper, Screening
-from services.tmdb import TMDBService
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +12,8 @@ class BestOfCinemaScraper(BaseScraper):
         self,
         cinema_name: str,
         url: str,
-        tmdb_service: Optional[TMDBService] = None,
-        threshold_year: int = 2010,
     ):
-        super().__init__(cinema_name, url, threshold_year)
-        self.tmdb_service = tmdb_service
+        super().__init__(cinema_name, url)
 
     async def get_screenings(self) -> list[Screening]:
         soup = await self.fetch_page(self.url)
@@ -39,31 +34,6 @@ class BestOfCinemaScraper(BaseScraper):
 
             movie_title, year, poster_url, screening_date, bocruntime = movie_data[:5]
 
-            tmdb_url = None
-            runtime = bocruntime
-            if self.tmdb_service and movie_title:
-                keep_original_title = self.tmdb_service._is_multi_part_title(
-                    movie_title
-                )
-                tmdb_info = await self.tmdb_service.get_movie_info(
-                    movie_title, year, keep_original_title
-                )
-                if tmdb_info and len(tmdb_info) == 5:
-                    tmdb_title, tmdb_year, tmdb_poster, tmdb_url, tmdb_runtime = (
-                        tmdb_info
-                    )
-                    if not keep_original_title and tmdb_title:
-                        movie_title = tmdb_title
-                    if tmdb_year:
-                        year = tmdb_year
-                    if tmdb_poster:
-                        poster_url = tmdb_poster
-                    if tmdb_runtime:
-                        runtime = tmdb_runtime
-
-            if year and year > self.threshold_year:
-                continue
-
             screenings.append(
                 Screening(
                     cinema_name=self.cinema_name,
@@ -71,9 +41,8 @@ class BestOfCinemaScraper(BaseScraper):
                     date=screening_date,
                     url=movie_url,
                     poster_url=poster_url,
-                    year=year,
-                    tmdb_url=tmdb_url,
-                    runtime=runtime,
+                    runtime=bocruntime,
+                    production_year=year,
                 )
             )
 
