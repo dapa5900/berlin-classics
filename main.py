@@ -351,7 +351,7 @@ async def main_async():
     logger.info("Starting Berlin Classics Newsletter generation")
 
     config = load_config()
-    threshold = config.get("newsletter", {}).get("classical_year_threshold", 2010)
+    threshold = datetime.now().year - 10
     tmdb_config = config.get("tmdb", {})
     language = tmdb_config.get("language", "de-DE")
     api_key = os.environ.get("TMDB_API_KEY", "")

@@ -34,7 +34,6 @@ cinemas:
     title_filters: []
 
 newsletter:
-  classical_year_threshold: 2010
 
 tmdb:
   language: "de-DE"

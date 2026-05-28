@@ -447,7 +447,6 @@
         <header>
             <h1>Berlin Classics</h1>
             <p class="subtitle">Klassische Filme <span class="break-after">in</span> Berliner Kinos</p>
-            <p class="meta">Generiert am {{ generated_at.strftime('%d.%m.%Y um %H:%M') }}</p>
         </header>
 
         <p style="text-align: center; margin: 20px 0;">
@@ -549,7 +548,7 @@
     </div>
 
         <footer>
-            <p>Berlin Classics Newsletter</p>
+            <p class="meta">Generiert am {{ generated_at.strftime('%d.%m.%Y um %H:%M') }}</p>
             <p>Filmscreening-Daten von {% for cinema in cinema_config.cinemas|default([])|sort(attribute='name') %}<a href="{{ cinema.url }}" target="_blank" style="color: #D4AF37;">{{ cinema.name }}</a>{% if not loop.last %}{% if loop.index == loop.length - 1 %} und {% else %}, {% endif %}{% endif %}{% endfor %}</p>
         </footer>
     </div>

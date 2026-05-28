@@ -64,7 +64,7 @@ def config_file(tmp_path: Path):
         "cinemas": [
             {"name": "Test Cinema", "url": "https://example.com", "type": "babylon"},
         ],
-        "newsletter": {"classical_year_threshold": 2010},
+        "newsletter": {},
         "tmdb": {"language": "de-DE"},
         "output": {"directory": "output", "filename_template": "newsletter_{date}.html"},
     }

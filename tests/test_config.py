@@ -15,7 +15,6 @@ def test_load_config_returns_dict(config_file: Path):
 
 def test_config_values(config_file: Path):
     result = load_config(str(config_file))
-    assert result["newsletter"]["classical_year_threshold"] == 2010
     assert result["tmdb"]["language"] == "de-DE"
 
 
