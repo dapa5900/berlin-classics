@@ -101,10 +101,10 @@ class BestOfCinemaScraper(BaseScraper):
 
         screening_date = None
         if date_str:
-            match = re.search(r"(\d{2})\.(\d{2})\.(\d{2})", date_str)
+            match = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", date_str)
             if match:
-                day, month, short_year = match.groups()
-                full_year = 2000 + int(short_year)
+                day, month, full_year = match.groups()
+                full_year = int(full_year)
                 try:
                     screening_date = datetime.strptime(
                         f"{day}.{month}.{full_year}", "%d.%m.%Y"
