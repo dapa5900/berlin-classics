@@ -278,8 +278,8 @@
             align-items: center;
         }
         .card-checkbox input {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
             accent-color: #D4AF37;
         }
@@ -414,12 +414,30 @@
                 gap: 10px;
             }
             .card-checkbox input {
-                width: 22px;
-                height: 22px;
+                width: 18px;
+                height: 18px;
+            }
+            .card-header-left {
+                gap: 6px;
+            }
+            .date-icon {
+                width: 24px;
+                height: 24px;
             }
             .break-after::after {
                 content: "\a";
                 white-space: pre;
+            }
+        }
+        @media (max-width: 400px) {
+            .card-header {
+                flex-direction: column;
+            }
+            .card-header-left {
+                width: 100%;
+            }
+            .card-checkbox {
+                align-self: flex-end;
             }
         }
     </style>

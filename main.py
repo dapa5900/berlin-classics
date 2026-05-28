@@ -87,6 +87,7 @@ async def enrich_screenings(
             expected_year=s.production_year,
             keep_original_title=keep_original_title,
             original_title=s.original_title,
+            scraped_runtime=s.runtime,
         )
         if info:
             tmdb_title, tmdb_year, tmdb_poster, tmdb_url, runtime = info

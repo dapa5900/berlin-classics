@@ -76,6 +76,22 @@ class TMDBService:
 
         return 0.0
 
+    def _any_title_matches(self, movie: dict, search_title: str) -> bool:
+        s = search_title.lower().strip()
+        return (
+            movie.get("title", "").lower().strip() == s
+            or movie.get("original_title", "").lower().strip() == s
+        )
+
+    def _best_title_similarity(self, movie: dict, search_title: str) -> float:
+        sim_title = self._calculate_title_similarity(
+            search_title, movie.get("title", "")
+        )
+        sim_original = self._calculate_title_similarity(
+            search_title, movie.get("original_title", "")
+        )
+        return max(sim_title, sim_original)
+
     def _clean_title(self, title: str) -> str:
         cleaned = unicodedata.normalize("NFD", title)
         cleaned = "".join(c for c in cleaned if not unicodedata.combining(c))
@@ -130,12 +146,34 @@ class TMDBService:
             logger.error(f"Error getting runtime for TMDB ID {tmdb_id}: {e}")
             return None
 
+    async def _pick_by_runtime(
+        self, candidates: list, scraped_runtime: int
+    ) -> Optional[dict]:
+        if not scraped_runtime or len(candidates) <= 1:
+            return candidates[0] if candidates else None
+        tasks = [self._get_movie_runtime(m["id"]) for m in candidates]
+        runtimes = await asyncio.gather(*tasks)
+        scored = [
+            (abs(scraped_runtime - r), m)
+            for m, r in zip(candidates, runtimes)
+            if r
+        ]
+        if scored:
+            scored.sort(key=lambda x: x[0])
+            logger.info(
+                f"  Runtime match: '{scored[0][1].get('title')}' "
+                f"(diff={scored[0][0]} min) from {len(candidates)} candidates"
+            )
+            return scored[0][1]
+        return candidates[0]
+
     async def get_movie_info(
         self,
         movie_title: str,
         expected_year: Optional[int] = None,
         keep_original_title: bool = False,
         original_title: Optional[str] = None,
+        scraped_runtime: int = 0,
     ) -> Optional[Tuple[str, int, str, str, int]]:
         cache_key = (
             f"{movie_title}|{expected_year}|{keep_original_title}|{original_title}"
@@ -191,6 +229,8 @@ class TMDBService:
 
             # --- FALLBACK TO MAIN SEARCH ---
             if not movie:
+                # Gather results from all languages
+                all_results = []
                 for lang in languages_to_try:
                     params = {
                         "api_key": self.api_key,
@@ -199,42 +239,95 @@ class TMDBService:
                     }
                     response = await self._request_tmdb(search_url, params)
                     data = response.json()
+                    if data.get("results"):
+                        all_results.extend(data["results"])
 
-                    if not data.get("results"):
-                        continue
+                if all_results:
+                    # Deduplicate by TMDB ID
+                    seen_ids = set()
+                    results = []
+                    for m in all_results:
+                        mid = m.get("id")
+                        if mid and mid not in seen_ids:
+                            seen_ids.add(mid)
+                            results.append(m)
 
-                    results = data["results"]
-
-                    matched_movie = None
                     if expected_year is not None:
-                        # 1. Exact year match
-                        for m in results:
-                            release_date = m.get("release_date", "")
-                            year = int(release_date[:4]) if release_date else None
-                            if year == expected_year:
-                                matched_movie = m
-                                break
+                        matched_movie = None
 
-                        # 1.25. Exact title match (year-independent)
+                        # 1. Exact title + exact year match (strongest signal)
+                        candidates = [
+                            m
+                            for m in results
+                            if self._any_title_matches(m, cleaned_title)
+                            and m.get("release_date", "")[:4]
+                            and int(m.get("release_date", "")[:4]) == expected_year
+                        ]
+                        if candidates:
+                            matched_movie = (
+                                candidates[0]
+                                if len(candidates) == 1
+                                else await self._pick_by_runtime(
+                                    candidates, scraped_runtime
+                                )
+                            )
+                            logger.info(
+                                f"  MATCH (exact title + year): "
+                                f"{matched_movie.get('title')} "
+                                f"({matched_movie.get('release_date', '')[:4]})"
+                            )
+
+                        # 2. Exact title match (within ±3 years of expected_year)
                         if not matched_movie:
-                            for m in results:
-                                tmdb_title = m.get("title", "")
-                                if tmdb_title.lower().strip() == cleaned_title.lower():
-                                    matched_movie = m
-                                    logger.info(
-                                        f"  MATCH (exact title): {tmdb_title} "
-                                        f"({m.get('release_date', '')[:4] if m.get('release_date') else '?'})"
+                            candidates = [
+                                m
+                                for m in results
+                                if self._any_title_matches(m, cleaned_title)
+                                and m.get("release_date", "")[:4]
+                                and abs(
+                                    int(m.get("release_date", "")[:4])
+                                    - expected_year
+                                )
+                                <= 3
+                            ]
+                            if candidates:
+                                matched_movie = (
+                                    candidates[0]
+                                    if len(candidates) == 1
+                                    else await self._pick_by_runtime(
+                                        candidates, scraped_runtime
                                     )
-                                    break
+                                )
+                                logger.info(
+                                    f"  MATCH (exact title): "
+                                    f"{matched_movie.get('title')} "
+                                    f"({matched_movie.get('release_date', '')[:4]}), "
+                                    f"year_diff="
+                                    f"{abs(int(matched_movie.get('release_date', '')[:4]) - expected_year)}"
+                                )
 
-                        # 1.5. Extended year match (±3 years, similarity threshold)
+                        # 3. Exact year match
                         if not matched_movie:
                             for m in results:
                                 release_date = m.get("release_date", "")
-                                year = int(release_date[:4]) if release_date else None
-                                tmdb_title = m.get("title", "")
-                                title_similarity = self._calculate_title_similarity(
-                                    cleaned_title, tmdb_title
+                                year = (
+                                    int(release_date[:4]) if release_date else None
+                                )
+                                if year == expected_year:
+                                    matched_movie = m
+                                    break
+
+                        # 4. Extended year match (±3 years, similarity threshold)
+                        if not matched_movie:
+                            for m in results:
+                                release_date = m.get("release_date", "")
+                                year = (
+                                    int(release_date[:4]) if release_date else None
+                                )
+                                title_similarity = (
+                                    self._best_title_similarity(
+                                        m, cleaned_title
+                                    )
                                 )
                                 if (
                                     year
@@ -243,20 +336,23 @@ class TMDBService:
                                 ):
                                     matched_movie = m
                                     logger.info(
-                                        f"  MATCH (±3yr): {tmdb_title} ({year}), "
+                                        f"  MATCH (±3yr): {m.get('title')} ({year}), "
                                         f"similarity={title_similarity:.2f}, "
                                         f"year_diff={abs(year - expected_year)}"
                                     )
                                     break
 
-                        # 2. Similarity/Year fallback
+                        # 5. Similarity/Year fallback
                         if not matched_movie:
                             for m in results:
                                 release_date = m.get("release_date", "")
-                                year = int(release_date[:4]) if release_date else None
-                                tmdb_title = m.get("title", "")
-                                title_similarity = self._calculate_title_similarity(
-                                    cleaned_title, tmdb_title
+                                year = (
+                                    int(release_date[:4]) if release_date else None
+                                )
+                                title_similarity = (
+                                    self._best_title_similarity(
+                                        m, cleaned_title
+                                    )
                                 )
                                 if (
                                     year
@@ -266,7 +362,7 @@ class TMDBService:
                                     matched_movie = m
                                     break
 
-                        # 3. Best Similarity fallback
+                        # 6. Best similarity fallback
                         if not matched_movie:
                             best_match = None
                             best_similarity = 0
@@ -274,10 +370,13 @@ class TMDBService:
 
                             for m in results:
                                 release_date = m.get("release_date", "")
-                                year = int(release_date[:4]) if release_date else None
-                                tmdb_title = m.get("title", "")
-                                title_similarity = self._calculate_title_similarity(
-                                    cleaned_title, tmdb_title
+                                year = (
+                                    int(release_date[:4]) if release_date else None
+                                )
+                                title_similarity = (
+                                    self._best_title_similarity(
+                                        m, cleaned_title
+                                    )
                                 )
 
                                 if title_similarity >= 0.7:
@@ -290,15 +389,35 @@ class TMDBService:
                                     elif title_similarity > best_similarity:
                                         best_similarity = title_similarity
                                         best_match = m
-                            matched_movie = best_match
+                            if best_match:
+                                matched_movie = best_match
 
                         if matched_movie:
                             movie = matched_movie
                     else:
-                        movie = results[0]
-
-                    if movie:
-                        break
+                        # No year hint — search all languages and combine results
+                        exact_matches = [
+                            m
+                            for m in results
+                            if self._any_title_matches(m, cleaned_title)
+                        ]
+                        if exact_matches:
+                            if len(exact_matches) > 1 and scraped_runtime:
+                                movie = await self._pick_by_runtime(
+                                    exact_matches, scraped_runtime
+                                )
+                            else:
+                                movie = max(
+                                    exact_matches,
+                                    key=lambda x: x.get("popularity", 0) or 0,
+                                )
+                        else:
+                            movie = max(
+                                results,
+                                key=lambda m: self._best_title_similarity(
+                                    m, cleaned_title
+                                ),
+                            ) or results[0]
 
             if not movie:
                 logger.warning(

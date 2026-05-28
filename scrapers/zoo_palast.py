@@ -148,6 +148,8 @@ class ZooPalastScraper(BaseScraper):
             if perf_slug:
                 url = f"https://{self._cinema_domain}/film/{perf_slug}"
 
+            runtime = perf.get("duration", 0) or movie.get("duration", 0) or 0
+
             screenings.append(
                 Screening(
                     cinema_name=cinema_name,
@@ -156,7 +158,7 @@ class ZooPalastScraper(BaseScraper):
                     year=year,
                     poster_url=poster_url,
                     url=url,
-                    runtime=0,
+                    runtime=runtime,
                     skip_year_filter=is_klassiker,
                     production_year=movie.get("year"),
                 )
