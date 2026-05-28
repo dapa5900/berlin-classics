@@ -104,6 +104,10 @@ class TMDBService:
         cleaned = re.sub(r"Achtung Berlin:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"Cicle Gaudí:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"80 Jahre DEFA:\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(
+            r"^[^:]+?am\s+(Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag):\s*",
+            "", cleaned, flags=re.IGNORECASE
+        )
         cleaned = re.sub(r"VIETNAM:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"THREE AMIGOS:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"INDOGERMAN FILMWEEK:\s*", "", cleaned, flags=re.IGNORECASE)
@@ -211,7 +215,19 @@ class TMDBService:
                                 matched_movie = m
                                 break
 
-                        # 1.5. Extended year match (±3 years, lower similarity threshold)
+                        # 1.25. Exact title match (year-independent)
+                        if not matched_movie:
+                            for m in results:
+                                tmdb_title = m.get("title", "")
+                                if tmdb_title.lower().strip() == cleaned_title.lower():
+                                    matched_movie = m
+                                    logger.info(
+                                        f"  MATCH (exact title): {tmdb_title} "
+                                        f"({m.get('release_date', '')[:4] if m.get('release_date') else '?'})"
+                                    )
+                                    break
+
+                        # 1.5. Extended year match (±3 years, similarity threshold)
                         if not matched_movie:
                             for m in results:
                                 release_date = m.get("release_date", "")
@@ -223,7 +239,7 @@ class TMDBService:
                                 if (
                                     year
                                     and abs(year - expected_year) <= 3
-                                    and title_similarity >= 0.3
+                                    and title_similarity >= 0.8
                                 ):
                                     matched_movie = m
                                     logger.info(

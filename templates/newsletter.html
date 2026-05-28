@@ -195,20 +195,15 @@
             margin-bottom: 12px;
             border-bottom: 1px solid rgba(212,175,55,0.3);
         }
-        .card-date {
-            font-size: 1em;
-            color: #D4AF37;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+        .card-header-left {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
         }
-        .date-icon {
-            width: 1.1em;
-            height: 1.1em;
-            fill: #D4AF37;
-            flex-shrink: 0;
+        .card-header-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.3;
         }
         .poster-link {
             display: block;
@@ -262,29 +257,26 @@
             color: #D4AF37;
             font-weight: 600;
             letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        }
+        .date-icon {
+            width: 32px;
+            height: 32px;
+            fill: #D4AF37;
+            flex-shrink: 0;
+        }
+        .card-time {
+            font-size: 0.85em;
+            color: #a09890;
         }
         .card-checkbox {
             display: flex;
             align-items: center;
         }
         .card-checkbox input {
-            width: 18px;
-            height: 18px;
+            width: 26px;
+            height: 26px;
             cursor: pointer;
             accent-color: #D4AF37;
-        }
-        .screening-details {
-            text-align: center;
-            font-size: 0.85em;
-            color: #a09890;
-            margin-top: 10px;
-        }
-        .screening-details a {
-            color: #D4AF37;
-            font-size: 1em;
         }
         .date-divider {
             font-size: 0.85em;
@@ -325,10 +317,6 @@
         .movie-title a:hover {
             color: #D4AF37;
         }
-        .screening-details {
-            color: #a8a29e;
-            font-size: 0.95em;
-        }
         .year {
             color: #F5F1E8;
             font-family: 'Cinzel', serif;
@@ -337,7 +325,7 @@
             letter-spacing: 1px;
         }
         .tmdb-link {
-            color: #D4AF37;
+            color: #a09890;
             font-size: 0.95em;
         }
         .tmdb-link:hover {
@@ -420,17 +408,9 @@
             .cinema-screenings {
                 gap: 10px;
             }
-            .card-header {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
-            .card-checkbox {
-                align-self: flex-end;
-            }
             .card-checkbox input {
-                width: 24px;
-                height: 24px;
+                width: 26px;
+                height: 26px;
             }
             .break-after::after {
                 content: "\a";
@@ -468,11 +448,21 @@
                     {% for screening in cinema_screenings|sort(attribute='date') %}
                         <article class="screening-card">
                             <div class="card-header">
-                                <div class="card-date">
+                                <div class="card-header-left">
                                     <svg class="date-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                                     </svg>
-                                    {{ screening.date.strftime('%a, %d.%m.%Y') }}
+                                    <div class="card-header-text">
+                                        <span class="card-date">{{ screening.date.strftime('%a, %d.%m.%Y') }}</span>
+                                        <span class="card-time">
+                                            {% if screening.cinema_name == 'Best of Cinema' %}
+                                                Ganztägig
+                                            {% else %}
+                                                {{ screening.date.strftime('%H:%M') }}{% if screening.runtime %} · {{ screening.runtime }} Min.{% endif %}
+                                            {% endif %}
+                                            {% if screening.tmdb_url %} · <a href="{{ screening.tmdb_url }}" target="_blank" class="tmdb-link" title="Filminfos auf TMDB ansehen">TMDB</a>{% endif %}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="card-checkbox">
                                     <input type="checkbox" 
@@ -513,14 +503,6 @@
                                         <span class="year">({{ screening.year }})</span>
                                     {% endif %}
                                 </h3>
-                                <p class="screening-details">
-                                    {% if screening.cinema_name == 'Best of Cinema' %}
-                                        Ganztägig
-                                    {% else %}
-                                        {{ screening.date.strftime('%H:%M') }}{% if screening.runtime %} · {{ screening.runtime }} Min.{% endif %}
-                                    {% endif %}
-                                    {% if screening.tmdb_url %} · <a href="{{ screening.tmdb_url }}" target="_blank" class="tmdb-link" title="Filminfos auf TMDB ansehen">TMDB</a>{% endif %}
-                                </p>
                             </div>
                         </article>
                     {% endfor %}
