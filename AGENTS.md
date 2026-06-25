@@ -97,7 +97,7 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 - `TMDB_API_KEY` in `.env` (create from scratch, no template file)
 - Python 3.13+, `pip install -r requirements.txt` → `playwright install chromium`
 - `cache/`, `output/`, `venv/`, `logs/` in `.gitignore`
-- Scheduled Task (Windows): `NewsletterGenerator`, daily 13:00, runs `scripts\run_scheduled.bat`
+- Scheduled Task (Windows): `NewsletterGenerator`, every 3 days at 13:00, runs `scripts\run_scheduled.bat`
 
 ## Test quirks
 
