@@ -78,10 +78,17 @@ class TMDBService:
 
     def _any_title_matches(self, movie: dict, search_title: str) -> bool:
         s = search_title.lower().strip()
-        return (
-            movie.get("title", "").lower().strip() == s
-            or movie.get("original_title", "").lower().strip() == s
-        )
+        if not s:
+            return False
+        for candidate in (movie.get("title", ""), movie.get("original_title", "")):
+            c = candidate.lower().strip()
+            if c == s:
+                return True
+            if c.startswith(s):
+                rest = c[len(s):]
+                if rest and not rest[0].isalnum():
+                    return True
+        return False
 
     def _best_title_similarity(self, movie: dict, search_title: str) -> float:
         sim_title = self._calculate_title_similarity(

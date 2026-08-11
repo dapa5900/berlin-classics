@@ -73,6 +73,41 @@ class TestCleanTitle:
         assert "So grun war mein Tal" == result
 
 
+class TestAnyTitleMatches:
+    """Tests for TMDBService._any_title_matches."""
+
+    def setup_method(self):
+        self.service = TMDBService(api_key="test_key", language="de-DE")
+
+    def test_exact_title_match(self):
+        movie = {"title": "Jaws", "original_title": "Jaws"}
+        assert self.service._any_title_matches(movie, "Jaws")
+
+    def test_exact_original_title_match(self):
+        movie = {"title": "Der weiße Hai", "original_title": "Jaws"}
+        assert self.service._any_title_matches(movie, "Jaws")
+
+    def test_prefix_match_with_colon(self):
+        # e.g. "Terminator 2" must match "Terminator 2: Judgment Day"
+        movie = {"title": "Terminator 2: Judgment Day", "original_title": "Terminator 2: Judgment Day"}
+        assert self.service._any_title_matches(movie, "Terminator 2")
+
+    def test_prefix_match_with_dash(self):
+        movie = {"title": "Alien - Das unheimliche Wesen", "original_title": "Alien"}
+        assert self.service._any_title_matches(movie, "Alien")
+
+    def test_no_partial_word_match(self):
+        # "Terminator" must NOT match "Terminators" / "Terminator2"
+        movie = {"title": "Terminators", "original_title": "Terminators"}
+        assert not self.service._any_title_matches(movie, "Terminator")
+        movie2 = {"title": "Terminator2", "original_title": "Terminator2"}
+        assert not self.service._any_title_matches(movie2, "Terminator")
+
+    def test_no_match(self):
+        movie = {"title": "Shocking Dark", "original_title": "Terminator 2"}
+        assert not self.service._any_title_matches(movie, "Terminator 2 - Tag der Abrechnung")
+
+
 class TestCalculateTitleSimilarity:
     """Tests for TMDBService._calculate_title_similarity."""
 
