@@ -124,11 +124,12 @@ class TestNewsletterGenerator:
             threshold_year=2010,
             cinema_config={"cinemas": []},
         )
-        # Per-card button, multi-select panel, and Template-URL builder
+        # Per-card Google button and Template-URL builder
         assert "gcal-btn" in html
-        assert "exportToGCal" in html
         assert "addSingleToGCal" in html
         assert "calendar.google.com/calendar/render?action=TEMPLATE" in html
-        # ICS export must still be present
-        assert "exportToCalendar" in html
-        assert "berlin-classics-events.ics" in html
+        # ICS export is removed: no checkboxes, no ICS builder, no download
+        assert "movie-select" not in html
+        assert "exportToCalendar" not in html
+        assert "exportToGCal" not in html
+        assert "berlin-classics-events.ics" not in html

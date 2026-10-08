@@ -48,7 +48,7 @@ Body line-height: `1.7`.
 │       └── article.screening-card × M
 │           ├── div.card-header
 │           │   ├── div.card-date (calendar SVG icon + "So, 31.05.2026")
-│           │   └── div.card-checkbox (checkbox + Google-Calendar button for export)
+│           │   └── div.card-actions (Google-Calendar button for export)
 │           ├── a.poster-link → img.poster (2:3, max 180px wide)
 │           │   └── OR div.poster-placeholder (gold gradient, "BERLIN\nCLASSICS")
 │           └── div.screening-info (centered text)
@@ -58,8 +58,6 @@ Body line-height: `1.7`.
 
 ### Fixed floating buttons (top-left desktop, top-right mobile)
 - Expand/collapse all (chevron SVG icon)
-- Calendar export (calendar SVG icon) — generates `.ics`
-- Google Calendar export (calendar SVG icon + "+" badge) — opens a panel with one prefilled Google-Calendar link per selected screening (`calendar.google.com/calendar/render?action=TEMPLATE`, times converted Berlin-local → UTC, all-day as `YYYYMMDD/YYYYMMDD`)
 
 ## Grid & Responsiveness
 
@@ -67,7 +65,7 @@ Body line-height: `1.7`.
 |---|---|---|
 | >900px | **3 columns** `1fr`, gap `20px` | Default |
 | 600–900px | **2 columns** | – |
-| ≤600px | **1 column** | `h1` → `2.2em`, `letter-spacing: 4px`, body padding `20px 15px`, section padding `22px`, floating buttons → right side, checkbox → `24px` |
+| ≤600px | **1 column** | `h1` → `2.2em`, `letter-spacing: 4px`, body padding `20px 15px`, section padding `22px`, floating buttons → right side, gcal-btn → `32px` |
 
 ## Spacing & Sizing
 
@@ -86,9 +84,7 @@ Body line-height: `1.7`.
 - **Card hover**: `translateY(-3px)`, gold box-shadow intensifies, border brightens.
 - **Movie title link hover**: Turns gold `#D4AF37`.
 - **Poster link**: Wraps poster in `<a>` to cinema page, no underline decoration.
-- **Checkboxes**: `accent-color: #D4AF37`, used for `.ics` calendar export.
-- **Per-card Google button** (`.gcal-btn`, 28px / 32px mobile, transparent with gold border + "+" badge): opens one prefilled Google-Calendar event for that screening in a new tab. No checkbox needed.
-- **GCal panel** (`.gcal-panel`, centered fixed, max 520px): lists one save-link per selected screening — one URL can only carry one event, so multi-select renders links instead of opening N tabs (popup blockers).
+- **Per-card Google button** (`.gcal-btn` in `.card-actions`, 28px / 32px mobile, transparent with gold border + "+" badge): opens one prefilled Google-Calendar event for that screening in a new tab (`calendar.google.com/calendar/render?action=TEMPLATE`, times converted Berlin-local → UTC, all-day as `YYYYMMDD/YYYYMMDD`). No checkboxes, no ICS export.
 
 ## Visual Effects
 

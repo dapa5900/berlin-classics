@@ -273,15 +273,9 @@
             font-size: 0.85em;
             color: #a09890;
         }
-        .card-checkbox {
+        .card-actions {
             display: flex;
             align-items: center;
-        }
-        .card-checkbox input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #D4AF37;
         }
         .gcal-btn {
             width: 28px;
@@ -293,7 +287,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: 8px;
+            margin-left: 0;
             padding: 0;
             transition: all 0.3s ease;
         }
@@ -325,84 +319,6 @@
             line-height: 11px;
             text-align: center;
             font-weight: bold;
-        }
-        .floating-btn.btn-plus::after {
-            width: 16px;
-            height: 16px;
-            font-size: 12px;
-            line-height: 14px;
-            right: -3px;
-            bottom: -3px;
-        }
-        .gcal-panel {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 200;
-            background: linear-gradient(180deg, rgba(30,18,25,0.97) 0%, rgba(18,10,15,0.98) 100%);
-            border: 1px solid rgba(212,175,55,0.4);
-            border-radius: 4px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            padding: 25px 30px;
-            max-width: 520px;
-            width: calc(100% - 40px);
-            max-height: 70vh;
-            overflow-y: auto;
-            display: none;
-        }
-        .gcal-panel h3 {
-            font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
-            color: #D4AF37;
-            letter-spacing: 2px;
-            font-size: 1.1em;
-            margin: 0 0 10px 0;
-        }
-        .gcal-hint {
-            color: #a09890;
-            font-size: 0.85em;
-            margin: 0 0 18px 0;
-        }
-        .gcal-panel ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 18px 0;
-        }
-        .gcal-panel li {
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(212,175,55,0.15);
-            font-size: 0.9em;
-        }
-        .gcal-panel li:last-child {
-            border-bottom: none;
-        }
-        .gcal-panel li a {
-            color: #D4AF37;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .gcal-panel li a:hover {
-            text-decoration: underline;
-        }
-        .gcal-panel .gcal-date {
-            color: #a09890;
-            font-size: 0.85em;
-        }
-        .gcal-close {
-            font-family: 'Cinzel', Georgia, serif;
-            font-size: 0.85em;
-            font-weight: 600;
-            letter-spacing: 2px;
-            color: #0d080c;
-            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
-            border: none;
-            border-radius: 4px;
-            padding: 10px 24px;
-            cursor: pointer;
-        }
-        .gcal-close:hover {
-            background: linear-gradient(135deg, #E5C158 0%, #D4AF37 100%);
         }
         .date-divider {
             font-size: 0.85em;
@@ -534,10 +450,6 @@
             .cinema-screenings {
                 gap: 10px;
             }
-            .card-checkbox input {
-                width: 18px;
-                height: 18px;
-            }
             .gcal-btn {
                 width: 32px;
                 height: 32px;
@@ -561,7 +473,7 @@
             .card-header-left {
                 width: 100%;
             }
-            .card-checkbox {
+            .card-actions {
                 align-self: flex-end;
             }
         }
@@ -611,20 +523,17 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div class="card-checkbox">
-                                    <input type="checkbox" 
-                                            title="Für Kalender-Export markieren"
-                                            class="movie-select" 
+                                <div class="card-actions">
+                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="{{ screening.movie_title }}"
                                             data-year="{{ screening.year }}"
                                             data-date="{{ screening.date.strftime('%Y-%m-%d') }}"
                                             data-time="{{ screening.date.strftime('%H:%M') }}"
                                             data-runtime="{{ screening.runtime }}"
-                                             data-cinema="{{ screening.venue_name if screening.venue_name else screening.cinema_name }}"
+                                            data-cinema="{{ screening.venue_name if screening.venue_name else screening.cinema_name }}"
                                             data-location="{{ cinema_config.cinemas|selectattr('name', 'equalto', screening.cinema_name)|map(attribute='google_maps_url')|first|default('') }}"
-                                             data-url="{{ screening.url }}"
-                                             data-tmdb-url="{{ screening.tmdb_url }}">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)">
+                                            data-url="{{ screening.url }}"
+                                            data-tmdb-url="{{ screening.tmdb_url }}">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                                         </svg>
@@ -669,23 +578,6 @@
                     <path d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/>
                 </svg>
             </button>
-            <button class="floating-btn" onclick="exportToCalendar()" title="Ausgewählte Termine in Kalender exportieren">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
-                </svg>
-            </button>
-            <button class="floating-btn btn-plus" onclick="exportToGCal()" title="Ausgewählte Termine in Google Kalender übernehmen">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="gcal-panel" id="gcal-panel">
-            <h3>In Google Kalender übernehmen</h3>
-            <p class="gcal-hint">Je Film einen Link anklicken – Google öffnet den vorausgefüllten Termin zur Bestätigung.</p>
-            <ul id="gcal-list"></ul>
-            <button class="gcal-close" onclick="closeGCalPanel()">Schließen</button>
         </div>
     </div>
 
@@ -731,23 +623,21 @@
             }
         }
 
-        function collectEvent(checkbox) {
-            var title = checkbox.dataset.title || '';
-            var year = checkbox.dataset.year || '';
-            var date = checkbox.dataset.date || '';
-            var time = checkbox.dataset.time || '19:00';
-            var runtime = parseInt(checkbox.dataset.runtime) || 0;
-            var cinema = checkbox.dataset.cinema || '';
-            var location = checkbox.dataset.location || '';
-            var url = checkbox.dataset.url || '';
-            var tmdbUrl = checkbox.dataset.tmdbUrl || '';
+        function collectEvent(element) {
+            var title = element.dataset.title || '';
+            var year = element.dataset.year || '';
+            var date = element.dataset.date || '';
+            var time = element.dataset.time || '19:00';
+            var runtime = parseInt(element.dataset.runtime) || 0;
+            var cinema = element.dataset.cinema || '';
+            var location = element.dataset.location || '';
+            var url = element.dataset.url || '';
+            var tmdbUrl = element.dataset.tmdbUrl || '';
 
             var summary = title;
             if (year) {
                 summary += ' (' + year + ')';
             }
-
-            var startDateTime = date.replace(/-/g, '') + 'T' + time.replace(/:/g, '') + '00';
 
             // Calculate end time directly without timezone issues
             var timeParts = time.split(':');
@@ -768,11 +658,6 @@
                 // Already at full hour, keep as is
             }
 
-            // Format with leading zeros
-            var endHourStr = endHours.toString().padStart(2, '0');
-            var endMinStr = endMins.toString().padStart(2, '0');
-            var endDateFormatted = date.replace(/-/g, '') + 'T' + endHourStr + endMinStr + '00';
-
             var isAllDay = (time === '00:00' || !time);
 
             var nextDay = new Date(date);
@@ -786,14 +671,6 @@
                 locationText = cinema;
             }
 
-            var description = '';
-            if (url) {
-                description += 'Film: ' + url + '\r\n';
-            }
-            if (tmdbUrl) {
-                description += 'TMDB: ' + tmdbUrl + '\r\n';
-            }
-
             // Start as local Date for UTC conversion (newsletter times are Europe/Berlin)
             var dateParts = date.split('-');
             var startObj = new Date(
@@ -803,11 +680,9 @@
             var durationMin = (endHours * 60 + endMins) - startTotal;
 
             return {
-                title: title, year: year, date: date, time: time,
-                cinema: cinema, locationText: locationText,
+                date: date, time: time,
                 summary: summary, isAllDay: isAllDay,
-                startDateTime: startDateTime, endDateFormatted: endDateFormatted,
-                nextDayStr: nextDayStr, description: description,
+                nextDayStr: nextDayStr, locationText: locationText,
                 startObj: startObj, durationMin: durationMin, url: url, tmdbUrl: tmdbUrl
             };
         }
@@ -842,88 +717,7 @@
         }
 
         function addSingleToGCal(button) {
-            var checkbox = button.parentElement.querySelector('.movie-select');
-            if (!checkbox) {
-                return;
-            }
-            window.open(toGCalUrl(collectEvent(checkbox)), '_blank', 'noopener');
-        }
-
-        function exportToGCal() {
-            var checkboxes = document.querySelectorAll('.movie-select:checked');
-            if (checkboxes.length === 0) {
-                alert('Bitte wähle mindestens einen Film aus.');
-                return;
-            }
-            var list = document.getElementById('gcal-list');
-            list.innerHTML = '';
-            checkboxes.forEach(function(checkbox) {
-                var ev = collectEvent(checkbox);
-                var li = document.createElement('li');
-                var label = document.createElement('div');
-                label.textContent = ev.summary + ' – '
-                    + ev.date.split('-').reverse().join('.')
-                    + (ev.isAllDay ? ' (ganztägig)' : ' ' + ev.time);
-                label.className = 'gcal-date';
-                var link = document.createElement('a');
-                link.href = toGCalUrl(ev);
-                link.target = '_blank';
-                link.rel = 'noopener';
-                link.textContent = 'In Google Kalender speichern';
-                li.appendChild(label);
-                li.appendChild(link);
-                list.appendChild(li);
-            });
-            document.getElementById('gcal-panel').style.display = 'block';
-        }
-
-        function closeGCalPanel() {
-            document.getElementById('gcal-panel').style.display = 'none';
-        }
-
-        function exportToCalendar() {
-            var checkboxes = document.querySelectorAll('.movie-select:checked');
-            if (checkboxes.length === 0) {
-                alert('Bitte wähle mindestens einen Film aus.');
-                return;
-            }
-
-            var icsContent = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Berlin Classics//Newsletter//EN\r\n';
-            
-            checkboxes.forEach(function(checkbox) {
-                var ev = collectEvent(checkbox);
-
-                icsContent += 'BEGIN:VEVENT\r\n';
-                icsContent += 'SUMMARY:' + ev.summary + '\r\n';
-
-                if (ev.isAllDay) {
-                    icsContent += 'DTSTART;VALUE=DATE:' + ev.date.replace(/-/g, '') + '\r\n';
-                    icsContent += 'DTEND;VALUE=DATE:' + ev.nextDayStr + '\r\n';
-                } else {
-                    icsContent += 'DTSTART:' + ev.startDateTime + '\r\n';
-                    icsContent += 'DTEND:' + ev.endDateFormatted + '\r\n';
-                }
-
-                if (ev.locationText) {
-                    icsContent += 'LOCATION:' + ev.locationText + '\r\n';
-                }
-
-                if (ev.description) {
-                    icsContent += 'DESCRIPTION:' + ev.description.replace(/\r?\n/g, '\\n') + '\r\n';
-                }
-
-                icsContent += 'END:VEVENT\r\n';
-            });
-            
-            icsContent += 'END:VCALENDAR\r\n';
-
-            var blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            var link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = 'berlin-classics-events.ics';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            window.open(toGCalUrl(collectEvent(button)), '_blank', 'noopener');
         }
     </script>
 </body>
