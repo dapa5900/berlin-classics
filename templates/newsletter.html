@@ -283,6 +283,127 @@
             cursor: pointer;
             accent-color: #D4AF37;
         }
+        .gcal-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid rgba(212,175,55,0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        .gcal-btn:hover {
+            background: rgba(212,175,55,0.15);
+            border-color: #D4AF37;
+            transform: scale(1.1);
+        }
+        .gcal-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: #D4AF37;
+        }
+        .btn-plus {
+            position: relative;
+        }
+        .btn-plus::after {
+            content: '+';
+            position: absolute;
+            right: -5px;
+            bottom: -5px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #0d080c;
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            font-size: 10px;
+            line-height: 11px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .floating-btn.btn-plus::after {
+            width: 16px;
+            height: 16px;
+            font-size: 12px;
+            line-height: 14px;
+            right: -3px;
+            bottom: -3px;
+        }
+        .gcal-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 200;
+            background: linear-gradient(180deg, rgba(30,18,25,0.97) 0%, rgba(18,10,15,0.98) 100%);
+            border: 1px solid rgba(212,175,55,0.4);
+            border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            padding: 25px 30px;
+            max-width: 520px;
+            width: calc(100% - 40px);
+            max-height: 70vh;
+            overflow-y: auto;
+            display: none;
+        }
+        .gcal-panel h3 {
+            font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+            color: #D4AF37;
+            letter-spacing: 2px;
+            font-size: 1.1em;
+            margin: 0 0 10px 0;
+        }
+        .gcal-hint {
+            color: #a09890;
+            font-size: 0.85em;
+            margin: 0 0 18px 0;
+        }
+        .gcal-panel ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 18px 0;
+        }
+        .gcal-panel li {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(212,175,55,0.15);
+            font-size: 0.9em;
+        }
+        .gcal-panel li:last-child {
+            border-bottom: none;
+        }
+        .gcal-panel li a {
+            color: #D4AF37;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .gcal-panel li a:hover {
+            text-decoration: underline;
+        }
+        .gcal-panel .gcal-date {
+            color: #a09890;
+            font-size: 0.85em;
+        }
+        .gcal-close {
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 0.85em;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #0d080c;
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            border: none;
+            border-radius: 4px;
+            padding: 10px 24px;
+            cursor: pointer;
+        }
+        .gcal-close:hover {
+            background: linear-gradient(135deg, #E5C158 0%, #D4AF37 100%);
+        }
         .date-divider {
             font-size: 0.85em;
             color: #D4AF37;
@@ -417,6 +538,10 @@
                 width: 18px;
                 height: 18px;
             }
+            .gcal-btn {
+                width: 32px;
+                height: 32px;
+            }
             .card-header-left {
                 gap: 6px;
             }
@@ -499,6 +624,11 @@
                                             data-location="{{ cinema_config.cinemas|selectattr('name', 'equalto', screening.cinema_name)|map(attribute='google_maps_url')|first|default('') }}"
                                              data-url="{{ screening.url }}"
                                              data-tmdb-url="{{ screening.tmdb_url }}">
+                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                             
@@ -544,6 +674,18 @@
                     <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
                 </svg>
             </button>
+            <button class="floating-btn btn-plus" onclick="exportToGCal()" title="Ausgewählte Termine in Google Kalender übernehmen">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="gcal-panel" id="gcal-panel">
+            <h3>In Google Kalender übernehmen</h3>
+            <p class="gcal-hint">Je Film einen Link anklicken – Google öffnet den vorausgefüllten Termin zur Bestätigung.</p>
+            <ul id="gcal-list"></ul>
+            <button class="gcal-close" onclick="closeGCalPanel()">Schließen</button>
         </div>
     </div>
 
@@ -589,6 +731,156 @@
             }
         }
 
+        function collectEvent(checkbox) {
+            var title = checkbox.dataset.title || '';
+            var year = checkbox.dataset.year || '';
+            var date = checkbox.dataset.date || '';
+            var time = checkbox.dataset.time || '19:00';
+            var runtime = parseInt(checkbox.dataset.runtime) || 0;
+            var cinema = checkbox.dataset.cinema || '';
+            var location = checkbox.dataset.location || '';
+            var url = checkbox.dataset.url || '';
+            var tmdbUrl = checkbox.dataset.tmdbUrl || '';
+
+            var summary = title;
+            if (year) {
+                summary += ' (' + year + ')';
+            }
+
+            var startDateTime = date.replace(/-/g, '') + 'T' + time.replace(/:/g, '') + '00';
+
+            // Calculate end time directly without timezone issues
+            var timeParts = time.split(':');
+            var hours = parseInt(timeParts[0]);
+            var mins = parseInt(timeParts[1]);
+            var startTotal = hours * 60 + mins;
+            var totalMinutes = startTotal + runtime;
+            var endHours = Math.floor(totalMinutes / 60);
+            var endMins = totalMinutes % 60;
+
+            // Round up to nearest 30 minutes
+            if (endMins > 0 && endMins <= 30) {
+                endMins = 30;
+            } else if (endMins > 30) {
+                endHours = endHours + 1;
+                endMins = 0;
+            } else if (endMins === 0) {
+                // Already at full hour, keep as is
+            }
+
+            // Format with leading zeros
+            var endHourStr = endHours.toString().padStart(2, '0');
+            var endMinStr = endMins.toString().padStart(2, '0');
+            var endDateFormatted = date.replace(/-/g, '') + 'T' + endHourStr + endMinStr + '00';
+
+            var isAllDay = (time === '00:00' || !time);
+
+            var nextDay = new Date(date);
+            nextDay.setDate(nextDay.getDate() + 1);
+            var nextDayStr = nextDay.toISOString().replace(/-/g, '').substring(0, 8);
+
+            var locationText = '';
+            if (location) {
+                locationText = location;
+            } else if (cinema) {
+                locationText = cinema;
+            }
+
+            var description = '';
+            if (url) {
+                description += 'Film: ' + url + '\r\n';
+            }
+            if (tmdbUrl) {
+                description += 'TMDB: ' + tmdbUrl + '\r\n';
+            }
+
+            // Start as local Date for UTC conversion (newsletter times are Europe/Berlin)
+            var dateParts = date.split('-');
+            var startObj = new Date(
+                parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]),
+                hours, mins, 0
+            );
+            var durationMin = (endHours * 60 + endMins) - startTotal;
+
+            return {
+                title: title, year: year, date: date, time: time,
+                cinema: cinema, locationText: locationText,
+                summary: summary, isAllDay: isAllDay,
+                startDateTime: startDateTime, endDateFormatted: endDateFormatted,
+                nextDayStr: nextDayStr, description: description,
+                startObj: startObj, durationMin: durationMin, url: url, tmdbUrl: tmdbUrl
+            };
+        }
+
+        function toGCalUrl(ev) {
+            var base = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+            var dates;
+            if (ev.isAllDay) {
+                dates = ev.date.replace(/-/g, '') + '/' + ev.nextDayStr;
+            } else {
+                var fmtUtc = function(d) {
+                    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                };
+                var startUtc = fmtUtc(ev.startObj);
+                var endUtc = fmtUtc(new Date(ev.startObj.getTime() + ev.durationMin * 60000));
+                dates = startUtc + '/' + endUtc;
+            }
+            var details = '';
+            if (ev.url) {
+                details += 'Film: ' + ev.url + '\n';
+            }
+            if (ev.tmdbUrl) {
+                details += 'TMDB: ' + ev.tmdbUrl + '\n';
+            }
+            var params = '&text=' + encodeURIComponent(ev.summary)
+                + '&dates=' + encodeURIComponent(dates)
+                + '&details=' + encodeURIComponent(details);
+            if (ev.locationText) {
+                params += '&location=' + encodeURIComponent(ev.locationText);
+            }
+            return base + params;
+        }
+
+        function addSingleToGCal(button) {
+            var checkbox = button.parentElement.querySelector('.movie-select');
+            if (!checkbox) {
+                return;
+            }
+            window.open(toGCalUrl(collectEvent(checkbox)), '_blank', 'noopener');
+        }
+
+        function exportToGCal() {
+            var checkboxes = document.querySelectorAll('.movie-select:checked');
+            if (checkboxes.length === 0) {
+                alert('Bitte wähle mindestens einen Film aus.');
+                return;
+            }
+            var list = document.getElementById('gcal-list');
+            list.innerHTML = '';
+            checkboxes.forEach(function(checkbox) {
+                var ev = collectEvent(checkbox);
+                var li = document.createElement('li');
+                var label = document.createElement('div');
+                label.textContent = ev.summary + ' – '
+                    + ev.date.split('-').reverse().join('.')
+                    + (ev.isAllDay ? ' (ganztägig)' : ' ' + ev.time);
+                label.className = 'gcal-date';
+                var link = document.createElement('a');
+                link.href = toGCalUrl(ev);
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.textContent = 'In Google Kalender speichern';
+                li.appendChild(label);
+                li.appendChild(link);
+                list.appendChild(li);
+            });
+            document.getElementById('gcal-panel').style.display = 'block';
+        }
+
+        function closeGCalPanel() {
+            document.getElementById('gcal-panel').style.display = 'none';
+        }
+
         function exportToCalendar() {
             var checkboxes = document.querySelectorAll('.movie-select:checked');
             if (checkboxes.length === 0) {
@@ -599,79 +891,27 @@
             var icsContent = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Berlin Classics//Newsletter//EN\r\n';
             
             checkboxes.forEach(function(checkbox) {
-                var title = checkbox.dataset.title || '';
-                var year = checkbox.dataset.year || '';
-                var date = checkbox.dataset.date || '';
-                var time = checkbox.dataset.time || '19:00';
-                var runtime = parseInt(checkbox.dataset.runtime) || 0;
-                var cinema = checkbox.dataset.cinema || '';
-                var location = checkbox.dataset.location || '';
-                var url = checkbox.dataset.url || '';
-                var tmdbUrl = checkbox.dataset.tmdbUrl || '';
+                var ev = collectEvent(checkbox);
 
-                var summary = title;
-                if (year) {
-                    summary += ' (' + year + ')';
-                }
-
-                var startDateTime = date.replace(/-/g, '') + 'T' + time.replace(/:/g, '') + '00';
-                
-                // Calculate end time directly without timezone issues
-                var timeParts = time.split(':');
-                var hours = parseInt(timeParts[0]);
-                var mins = parseInt(timeParts[1]);
-                var totalMinutes = hours * 60 + mins + runtime;
-                var endHours = Math.floor(totalMinutes / 60);
-                var endMins = totalMinutes % 60;
-
-                // Round up to nearest 30 minutes
-                if (endMins > 0 && endMins <= 30) {
-                    endMins = 30;
-                } else if (endMins > 30) {
-                    endHours = endHours + 1;
-                    endMins = 0;
-                } else if (endMins === 0) {
-                    // Already at full hour, keep as is
-                }
-
-                // Format with leading zeros
-                var endHourStr = endHours.toString().padStart(2, '0');
-                var endMinStr = endMins.toString().padStart(2, '0');
-                var endDateFormatted = date.replace(/-/g, '') + 'T' + endHourStr + endMinStr + '00';
-
-                var isAllDay = (time === '00:00' || !time);
-                
                 icsContent += 'BEGIN:VEVENT\r\n';
-                icsContent += 'SUMMARY:' + summary + '\r\n';
-                
-                if (isAllDay) {
-                    var nextDay = new Date(date);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    var nextDayStr = nextDay.toISOString().replace(/-/g, '').substring(0, 8);
-                    icsContent += 'DTSTART;VALUE=DATE:' + date.replace(/-/g, '') + '\r\n';
-                    icsContent += 'DTEND;VALUE=DATE:' + nextDayStr + '\r\n';
+                icsContent += 'SUMMARY:' + ev.summary + '\r\n';
+
+                if (ev.isAllDay) {
+                    icsContent += 'DTSTART;VALUE=DATE:' + ev.date.replace(/-/g, '') + '\r\n';
+                    icsContent += 'DTEND;VALUE=DATE:' + ev.nextDayStr + '\r\n';
                 } else {
-                    icsContent += 'DTSTART:' + startDateTime + '\r\n';
-                    icsContent += 'DTEND:' + endDateFormatted + '\r\n';
+                    icsContent += 'DTSTART:' + ev.startDateTime + '\r\n';
+                    icsContent += 'DTEND:' + ev.endDateFormatted + '\r\n';
                 }
-                
-                if (location) {
-                    icsContent += 'LOCATION:' + location + '\r\n';
-                } else if (cinema) {
-                    icsContent += 'LOCATION:' + cinema + '\r\n';
+
+                if (ev.locationText) {
+                    icsContent += 'LOCATION:' + ev.locationText + '\r\n';
                 }
-                
-                var description = '';
-                if (url) {
-                    description += 'Film: ' + url + '\r\n';
+
+                if (ev.description) {
+                    icsContent += 'DESCRIPTION:' + ev.description.replace(/\r?\n/g, '\\n') + '\r\n';
                 }
-                if (tmdbUrl) {
-                    description += 'TMDB: ' + tmdbUrl + '\r\n';
-                }
-                if (description) {
-                    icsContent += 'DESCRIPTION:' + description.replace(/\r?\n/g, '\\n') + '\r\n';
-                }
-                
+
                 icsContent += 'END:VEVENT\r\n';
             });
             

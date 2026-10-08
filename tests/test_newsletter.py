@@ -116,3 +116,19 @@ class TestNewsletterGenerator:
         )
         assert "Babylon" in html
         assert "Zoo Palast" in html
+
+    def test_generate_includes_gcal_export(self, sample_screenings):
+        html = self.generator.generate(
+            screenings=sample_screenings,
+            output_path=None,
+            threshold_year=2010,
+            cinema_config={"cinemas": []},
+        )
+        # Per-card button, multi-select panel, and Template-URL builder
+        assert "gcal-btn" in html
+        assert "exportToGCal" in html
+        assert "addSingleToGCal" in html
+        assert "calendar.google.com/calendar/render?action=TEMPLATE" in html
+        # ICS export must still be present
+        assert "exportToCalendar" in html
+        assert "berlin-classics-events.ics" in html
