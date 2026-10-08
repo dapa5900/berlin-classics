@@ -1,4 +1,10 @@
 @echo off
+REM DEPRECATED (2026-10-08): do NOT register the legacy NewsletterGenerator task anymore.
+REM Primary/failover scheme: DELL runs NewsletterDaily at 14:00, FORGE1 at 16:00 via
+REM scripts\setup_failover_forge1.bat (imports scripts\task_failover_16h00.xml).
+echo DEPRECATED: use setup_failover_forge1.bat instead. Aborting.
+exit /b 1
+
 echo Setting up newsletter task at 13:00...
 
 schtasks /create /tn "NewsletterGenerator" /tr "cmd /c \"%~dp0run_scheduled.bat\"" /sc DAILY /mo 3 /st 13:00 /f

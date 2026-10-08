@@ -97,11 +97,12 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 - `TMDB_API_KEY` in `.env` (create from scratch, no template file)
 - Python 3.13+, `pip install -r requirements.txt` → `playwright install chromium`
 - `cache/`, `output/`, `venv/`, `logs/` in `.gitignore`
-- Scheduled Task (Windows): `NewsletterDaily`, daily at 14:00, runs `scripts\run_daily.bat`
-  - **Once-per-day guard across machines**: creates `cache\run_<yyyy-MM-dd>.txt` (marker) in the OneDrive-synced project folder *before* running; skips if today's marker exists. Marker deleted on pipeline failure (allows retry). Old markers (>14 days) cleaned up automatically.
-  - Full fresh scrape (`--no-cache`) + deploy via `scripts\deploy_quiet.bat` (no `pause`, so it won't hang when run headless). Logs to `logs\scheduler.log` with `%COMPUTERNAME%`.
-  - Task registered via XML (path contains ` - ` which breaks schtasks quoting): `schtasks /create /tn NewsletterDaily /xml <file> /f`, runs as current user (`InteractiveToken`), `MultipleInstancesPolicy=IgnoreNew`.
-  - Legacy: `NewsletterGenerator` (every 3 days at 13:00, `scripts\run_scheduled.bat`) — older alternative; not registered on this machine.
+- Scheduled Task (Windows): `NewsletterDaily`, runs `scripts\run_daily.bat`
+  - **Primary/failover across machines** (same OneDrive-synced folder): `WORKSTATIONDELL` daily at 14:00 (primary), `FORGE1` daily at 16:00 (failover). Whoever runs second skips via markers.
+  - **Two markers** in `cache/`: `run_<yyyy-MM-dd>.txt` (run started, contains `%COMPUTERNAME%` + timestamp) and `deployed_<yyyy-MM-dd>.txt` (deploy succeeded, written by `deploy_quiet.bat`). Logic: deployed exists → skip; fresh run marker (<30 min, other run may still go) → skip; stale run marker without deploy → skip scrape, retry deploy (failover); no marker → full run. Run marker deleted on pipeline failure (allows retry). Markers >14 days cleaned up automatically.
+  - Full fresh scrape (`--no-cache`) + deploy via `scripts\deploy_quiet.bat` (no `pause`, so it won't hang when run headless). Deploy is concurrency-safe: `git -c gc.auto=0` (no interactive gc cleanup), `GIT_TERMINAL_PROMPT=0`, `pull --rebase` before push + one push retry. Logs to `logs\scheduler.log` with `%COMPUTERNAME%`.
+  - Task registered via XML (path contains ` - ` which breaks schtasks quoting): `schtasks /create /tn NewsletterDaily /xml <file> /f`, runs as current user (`InteractiveToken`), `MultipleInstancesPolicy=IgnoreNew`. Failover import on FORGE1: run `scripts\setup_failover_forge1.bat` there (imports `scripts\task_failover_16h00.xml`, deletes legacy task).
+  - Legacy (DEPRECATED): `NewsletterGenerator` (every 3 days at 13:00, `scripts\run_scheduled.bat` + `setup_scheduler.bat`) — no marker guard, breaks the primary/failover scheme. Do not re-register.
 
 ## Test quirks
 
