@@ -482,21 +482,12 @@
             <button class="toggle-all-btn" onclick="toggleAll()">Alle ein-/ausklappen</button>
         </p>
 
-        {% set grouped = {} %}
-        {% for screening in screenings %}
-            {% if screening.cinema_name not in grouped %}
-                {% set _ = grouped.update({screening.cinema_name: []}) %}
-            {% endif %}
-            {% set _ = grouped[screening.cinema_name].append(screening) %}
-        {% endfor %}
-
-        {% for cinema_name, cinema_screenings in grouped.items()|sort %}
+        {% for group in grouped_screenings %}
             <section class="cinema-section">
-                <h2 class="cinema-title" onclick="toggleCinema(this)" style="cursor: pointer;">{{ cinema_name }} <span class="toggle-icon">+</span></h2>
+                <h2 class="cinema-title" onclick="toggleCinema(this)" style="cursor: pointer;">{{ group.name }} <span class="toggle-icon">+</span></h2>
                 
-                {% if cinema_screenings %}
                     <div class="cinema-screenings" style="display: none;">
-                    {% for screening in cinema_screenings|sort(attribute='date') %}
+                    {% for screening in group.screenings %}
                         <article class="screening-card{% if screening.is_new %} is-new{% endif %}">
                             <div class="card-header">
                                 <div class="card-header-left">
@@ -507,7 +498,7 @@
                                             data-time="{{ screening.date.strftime('%H:%M') }}"
                                             data-runtime="{{ screening.runtime }}"
                                             data-cinema="{{ screening.venue_name if screening.venue_name else screening.cinema_name }}"
-                                            data-location="{{ cinema_config.cinemas|selectattr('name', 'equalto', screening.cinema_name)|map(attribute='google_maps_url')|first|default('') }}"
+                                            data-location="{{ group.maps_url }}"
                                             data-url="{{ screening.url }}"
                                             data-tmdb-url="{{ screening.tmdb_url }}">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -532,7 +523,7 @@
                                 <a href="{{ screening.url }}" target="_blank" class="poster-link" title="Kino-Website aufrufen">
                             {% endif %}
                             {% if screening.poster_url %}
-                                <img src="{{ screening.poster_url }}" alt="{{ screening.movie_title }}" class="poster">
+                                <img src="{{ screening.poster_url }}" alt="{{ screening.movie_title }}" class="poster" loading="lazy">
                             {% else %}
                                 <div class="poster-placeholder">
                                     <span class="placeholder-text">BERLIN<br>CLASSICS</span>
@@ -555,7 +546,6 @@
                         </article>
                     {% endfor %}
                     </div>
-                {% endif %}
             </section>
         {% endfor %}
 
@@ -570,7 +560,7 @@
 
         <footer>
             <p class="meta">Generiert am {{ generated_at.strftime('%d.%m.%Y um %H:%M') }}</p>
-            <p>Filmscreening-Daten von {% for cinema in cinema_config.cinemas|default([])|sort(attribute='name') %}<a href="{{ cinema.url }}" target="_blank" style="color: #D4AF37;">{{ cinema.name }}</a>{% if not loop.last %}{% if loop.index == loop.length - 1 %} und {% else %}, {% endif %}{% endif %}{% endfor %}</p>
+            <p>Filmscreening-Daten von {% for cinema in rendered_cinemas|sort(attribute='name') %}<a href="{{ cinema.url }}" target="_blank" style="color: #D4AF37;">{{ cinema.name }}</a>{% if not loop.last %}{% if loop.index == loop.length - 1 %} und {% else %}, {% endif %}{% endif %}{% endfor %}</p>
         </footer>
     </div>
 

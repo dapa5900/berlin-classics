@@ -9,6 +9,39 @@ from scrapers.base import BaseScraper, Screening
 logger = logging.getLogger(__name__)
 
 
+def resolve_openair_date(
+    day: int, month: int, year_part: Optional[str],
+    hour: int, minute: int, now: datetime,
+) -> Optional[datetime]:
+    """Build a screening datetime from an open-air date fragment.
+
+    Without an explicit year the current year is assumed; a date that
+    already lies in the past belongs to next year. Returns None for
+    impossible dates (e.g. Feb 29 in a non-leap year).
+    """
+    if year_part:
+        year_int = int(year_part)
+        if year_int < 100:
+            year_int += 2000
+        explicit_year = True
+    else:
+        year_int = now.year
+        explicit_year = False
+    try:
+        screening_date = datetime(year_int, month, day, hour, minute)
+    except ValueError:
+        logger.warning(f"Invalid open-air date {day:02d}.{month:02d}.{year_int}, skipping")
+        return None
+    if not explicit_year and screening_date.date() < now.date():
+        try:
+            screening_date = screening_date.replace(year=year_int + 1)
+        except ValueError:
+            logger.warning(
+                f"Year rollover failed for {day:02d}.{month:02d}, keeping {year_int}"
+            )
+    return screening_date
+
+
 class OpenAirKinoScraper(BaseScraper):
     def __init__(
         self,
@@ -119,19 +152,18 @@ class OpenAirKinoScraper(BaseScraper):
             if not month:
                 return None
             year_part = date_match.group(3)
-            if year_part:
-                year_int = int(year_part)
-                if year_int < 100:
-                    year_int += 2000
-            else:
-                year_int = 2026
 
             time_parts = time_str.strip().split(":")
             hour = int(time_parts[0])
             minute = int(time_parts[1])
-            screening_date = datetime(year_int, month, day, hour, minute)
+            screening_date = resolve_openair_date(
+                day, month, year_part, hour, minute, datetime.now()
+            )
+            if screening_date is None:
+                return None
         else:
-            screening_date = datetime.now()
+            logger.warning(f"No open-air date found in '{date_str}', skipping entry")
+            return None
 
         title_link = article.find("h2", class_="entry-title")
         if title_link:

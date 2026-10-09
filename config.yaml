@@ -37,6 +37,12 @@ newsletter:
 
 tmdb:
   language: "de-DE"
+  # Additional series/festival title prefixes stripped during TMDB matching
+  # (regex list, applied AFTER the built-in defaults). Add new festival rows
+  # here instead of editing services/tmdb.py. Example:
+  # title_prefix_patterns:
+  #   - "My Festival:\\s*"
+  title_prefix_patterns: []
 
 output:
   directory: "output"

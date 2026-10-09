@@ -145,3 +145,50 @@ class TestNewsletterGenerator:
         # TMDB link lives in the title row (same typography as year), not the time row
         assert "tmdb-link-title" in html
         assert 'class="tmdb-link"' not in html
+
+    def test_footer_lists_only_rendered_cinemas(self, sample_screenings):
+        cinema_config = {
+            "cinemas": [
+                {
+                    "name": "Babylon",
+                    "url": "https://babylonberlin.eu",
+                    "google_maps_url": "https://maps.example.com/babylon",
+                },
+                {
+                    "name": "Zoo Palast",
+                    "url": "https://zoopalast.premiumkino.de",
+                    "google_maps_url": "https://maps.example.com/zoo",
+                },
+                {
+                    "name": "Open Air Cinema",
+                    "url": "https://openair-kino.net",
+                    "google_maps_url": None,
+                },
+            ]
+        }
+        # Blade Runner 2049 (2017) is filtered out by the threshold, so only
+        # Babylon + Zoo Palast render — Open Air must not appear in the footer.
+        rendered = [c for c in cinema_config["cinemas"] if c["name"] != "Open Air Cinema"]
+        html = self.generator.generate(
+            screenings=sample_screenings,
+            output_path=None,
+            threshold_year=2010,
+            cinema_config=cinema_config,
+            rendered_cinemas=rendered,
+        )
+        assert "https://babylonberlin.eu" in html
+        assert "https://zoopalast.premiumkino.de" in html
+        assert "Open Air Cinema" not in html
+        assert "https://openair-kino.net" not in html
+
+    def test_sections_grouped_and_sorted_by_cinema(self, sample_screenings):
+        html = self.generator.generate(
+            screenings=sample_screenings,
+            output_path=None,
+            threshold_year=2010,
+            cinema_config={"cinemas": []},
+        )
+        # One section per rendered cinema, sorted by name (Babylon < Zoo Palast)
+        assert html.index("cinema-title") < html.index("The Godfather")
+        assert html.index(">Babylon <") < html.index(">Zoo Palast <")
+        assert "Pulp Fiction" in html

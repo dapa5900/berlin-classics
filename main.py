@@ -61,7 +61,10 @@ def get_scraper(cinema_config: dict, page=None) -> Optional[BaseScraper]:
         "cinema_name": cinema_config["name"],
         "url": cinema_config["url"],
     }
-    if cinema_type == "zoo_palast" and page:
+    if cinema_type == "zoo_palast":
+        if not page:
+            logger.error("Zoo Palast scraper needs a Playwright page, skipping")
+            return None
         kwargs["page"] = page
     return scraper_class(**kwargs)
 
@@ -309,11 +312,12 @@ def load_enriched_cache() -> Optional[list[Screening]]:
         return None
 
 
-async def scrape_cinema(cinema, context) -> list[Screening]:
-    page = await context.new_page()
+async def scrape_cinema(cinema, context=None) -> list[Screening]:
+    page = await context.new_page() if context else None
     scraper = get_scraper(cinema, page)
     if not scraper:
-        await page.close()
+        if page:
+            await page.close()
         return []
     logger.info(f"Scraping {cinema['name']}...")
     try:
@@ -324,16 +328,35 @@ async def scrape_cinema(cinema, context) -> list[Screening]:
         logger.error(f"Error scraping {cinema['name']}: {e}")
         return []
     finally:
-        await page.close()
+        if page:
+            await page.close()
 
 
-async def scrape_all_raw(cinemas, context) -> list[Screening]:
+async def scrape_all_raw(cinemas, context=None) -> list[Screening]:
     tasks = [scrape_cinema(c, context) for c in cinemas]
     results = await asyncio.gather(*tasks)
     all_raw = []
     for r in results:
         all_raw.extend(r)
     return all_raw
+
+
+def _needs_browser(cinemas) -> bool:
+    return any(c.get("type") == "zoo_palast" for c in cinemas)
+
+
+async def _scrape_with_optional_browser(cinemas_to_scrape) -> list[Screening]:
+    """Launch Chromium only if a Playwright-based scraper is involved."""
+    if not _needs_browser(cinemas_to_scrape):
+        logger.info("No Playwright scraper involved, skipping browser launch")
+        return await scrape_all_raw(cinemas_to_scrape, None)
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        try:
+            context = await browser.new_context()
+            return await scrape_all_raw(cinemas_to_scrape, context)
+        finally:
+            await browser.close()
 
 
 def filter_screenings(
@@ -393,6 +416,9 @@ def _render_newsletter(
             "google_maps_url": cinema.get("google_maps_url"),
         })
 
+    rendered_names = {s.cinema_name for s in screenings}
+    rendered_cinemas = [c for c in cinema_config["cinemas"] if c["name"] in rendered_names]
+
     generator = NewsletterGenerator()
     apply_new_flags(screenings, load_baseline_keys(today))
     generator.generate(
@@ -400,6 +426,7 @@ def _render_newsletter(
         output_path=str(output_path),
         threshold_year=threshold_year,
         cinema_config=cinema_config,
+        rendered_cinemas=rendered_cinemas,
     )
     save_snapshot(screenings, today)
 
@@ -438,7 +465,11 @@ async def main_async():
         )
         return
 
-    tmdb_service = TMDBService(api_key=api_key, language=language)
+    tmdb_service = TMDBService(
+        api_key=api_key,
+        language=language,
+        title_prefix_patterns=tmdb_config.get("title_prefix_patterns") or None,
+    )
 
     # --- Fast path: skip TMDB, use enriched cache ---
     if args.fast:
@@ -472,19 +503,11 @@ async def main_async():
                 all_raw = [s for s in cached if s.cinema_name != cinema_name]
                 logger.info(f"Loaded {len(all_raw)} from cache (excluding {cinema_name})")
         cinemas_to_scrape = [c for c in config.get("cinemas", []) if c.get("type") == args.cinema]
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context()
-            scraped = await scrape_all_raw(cinemas_to_scrape, context)
-            all_raw.extend(scraped)
-            await browser.close()
+        scraped = await _scrape_with_optional_browser(cinemas_to_scrape)
+        all_raw.extend(scraped)
     elif args.no_cache:
         logger.info("Cache disabled, scraping fresh...")
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context()
-            all_raw = await scrape_all_raw(config.get("cinemas", []), context)
-            await browser.close()
+        all_raw = await _scrape_with_optional_browser(config.get("cinemas", []))
     else:
         cached = load_screenings_from_cache()
         if cached:
@@ -492,11 +515,7 @@ async def main_async():
             logger.info(f"Using {len(all_raw)} raw screenings from cache")
         else:
             logger.info("No cache found, scraping fresh...")
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                context = await browser.new_context()
-                all_raw = await scrape_all_raw(config.get("cinemas", []), context)
-                await browser.close()
+            all_raw = await _scrape_with_optional_browser(config.get("cinemas", []))
 
     if not all_raw:
         logger.warning("No screenings found")
@@ -508,6 +527,7 @@ async def main_async():
     logger.info(f"After title filter: {len(filtered_raw)} screenings")
 
     enriched = await enrich_screenings(filtered_raw, tmdb_service)
+    await tmdb_service.aclose()
     logger.info(f"After TMDB enrichment: {len(enriched)} screenings")
 
     with_tmdb = filter_no_tmdb(enriched)

@@ -48,6 +48,7 @@ scrape → cache/screenings.json → title filters → TMDB enrich → filter_no
 - **Rich cache** (`cache/screenings_enriched.json`): after TMDB, before year/title filters.
 - **Snapshot history** (`cache/snapshots/screenings_YYYY-MM-DD.json`, 8-day rotation): keys-light of the RENDERED classics set (`movie_title`, `venue`, `date`, `year`, `tmdb_url`). Written by `_render_newsletter` after every render (all modes incl. `--fast`). Baseline for `is_new` = youngest snapshot older than today; no baseline → nothing flagged.
 - **New detection**: `screening_key()` = `(movie_title, venue_name or cinema_name, date.isoformat())`. New screening date/venue of a known film counts as new. `Screening.is_new` renders as poster glow (`.is-new .poster`), no badge element.
+- **Footer sources** (`rendered_cinemas`): only cinemas present in the rendered set — computed in `_render_newsletter`, footer iterates that list, not `config.cinemas`.
 
 ## Architecture
 
@@ -55,16 +56,16 @@ scrape → cache/screenings.json → title filters → TMDB enrich → filter_no
 - TMDB enrichment groups by `(movie_title, production_year, original_title)`, queries TMDB once per group, mutates `Screening` in place.
 - TMDB rate-limited: `asyncio.Semaphore(5)` + 3 retries with exponential backoff (2s/4s/8s) on 429.
 - Year threshold: `datetime.now().year - 10`. Films ≤ threshold or with `skip_year_filter=True` pass.
-- Template groups by `venue_name` if set, else `cinema_name`. Only Open Air Kino sets `venue_name`.
+- Template groups by `cinema_name` (grouping pre-built as `grouped_screenings` in `services/newsletter.py`, incl. `maps_url` per section). `venue_name` is only the GCal/`data-cinema` label (Open Air sets it per venue, section stays "Open Air Cinema").
 - `locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")` at module level in `services/newsletter.py` — breaks if locale unavailable.
 - **Timezone pitfall**: Kinoheld dates (`datetime.fromisoformat`) are timezone-aware; other scrapers produce naive datetimes. Sort must use `.replace(tzinfo=None)` — see `main.py:446`.
 
 ## Scraper gotchas
 
-- **Babylon**: HTTP GET to `/programm`. Each `.mix` `<li>` has `cat-*` CSS class. `_strip_festival_prefix` auto-detects festival sections. Uses `.right-mix .mix-title`, `.mix-introtext` (year via `,\s*(\d{4})`, original via `[...]`), `.right-mix .runtime`.
-- **Zoo Palast**: Playwright-based. Intercepts API JSON from `premiumkino.de/program` via network listener. Also scrapes `/specials/filmklassiker` to set `skip_year_filter=True`.
+- **Babylon**: HTTP GET to `/programm`. Each `.mix` `<li>` has `cat-*` CSS class. `_strip_festival_prefix` auto-detects festival sections. Uses `.right-mix .mix-title`, `.mix-introtext` (year via `,\s*(\d{4})`, original via `[...]`), `.right-mix .runtime`. Date has no year → `resolve_screening_date` assumes current year, rolls to next year if in the past; unparseable dates log a warning and fall back to today 20:00.
+- **Zoo Palast**: Playwright-based. Intercepts API JSON from `premiumkino.de/program` via network listener. Also scrapes `/specials/filmklassiker` to set `skip_year_filter=True`. Chromium only launches when a Zoo scrape is actually requested (`_needs_browser`); pure-HTTP runs skip it.
 - **Best of Cinema**: Fetches each movie subpage. `Produktionsjahr:` and `Laufflänge` regex. **Date regex**: uses `(\d{2})\.(\d{2})\.(\d{4})` — do NOT use `(\d{2})` for year.
-- **Open Air Kino**: No `production_year` or `runtime`. Date in `div.meta_kino` previous sibling of `<article>`, uses `[\w.]+` for abbreviated German months. Multi-cinema aggregator — sets `venue_name`.
+- **Open Air Kino**: No `production_year` or `runtime`. Date in `div.meta_kino` previous sibling of `<article>`, uses `[\w.]+` for abbreviated German months. Multi-cinema aggregator — sets `venue_name`. Missing year part → current year + same past-date rollover as Babylon (`resolve_openair_date`); unparseable dates are skipped with a warning, never `datetime.now()`.
 - **Filmrausch**: HTTP-only (no Playwright). Parses embedded `<script id="programm-script-config-js-extra">` JSON (`filmrausch_php_vars.cached_data`). Strips `SPECIAL:`, `Klimareihe:`, `OPEN AIR:`, `OFFENE LEINWAND:`, `REEL LOVE:`, `MONDO VIDEO` prefixes via loop. Dates from `isoFull` are timezone-aware. Backend = Kinoheld.
 
 ## TMDB matching (`services/tmdb.py`)
@@ -93,6 +94,7 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 - `_pick_by_runtime(candidates, scraped_runtime)`: fetches TMDB runtimes in parallel, picks closest.
 - `_calculate_title_similarity(title1, title2)`: word-level (exact → 1.0, substring → 0.8, common-word ratio, else 0.0).
 - `_clean_title`: NFD-normalizes, strips known series/festival prefixes. Add patterns here for obscure titles. Also handles multi-part titles ("trilogie"/"marathon"/"X-hour").
+- Prefix patterns live in `DEFAULT_TITLE_PREFIX_PATTERNS` (`services/tmdb.py`), extendable via `tmdb.title_prefix_patterns` in `config.yaml` (no code change needed for new festivals). TMDB HTTP uses one shared `AsyncClient` per run (closed via `aclose()`); cache key includes `scraped_runtime`.
 
 ## Setup
 
@@ -108,7 +110,7 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 
 ## Test quirks
 
-- All 57 tests synchronous, no external dependencies.
+- All 69 tests synchronous, no external dependencies.
 - `conftest.py` provides `tmdb_service` (fake API key), `sample_screenings` (3 fixtures), `config_file` (tmp_path YAML), `filmrausch_embedded_json` fixture.
 - No tests exercise the actual TMDB API — mocking needed for integration tests.
 

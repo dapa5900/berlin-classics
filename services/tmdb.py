@@ -8,26 +8,73 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+# Series/festival title prefixes stripped during TMDB matching.
+# New festival rows only need an entry here (or via the
+# `tmdb.title_prefix_patterns` config key) — no code changes elsewhere.
+DEFAULT_TITLE_PREFIX_PATTERNS = [
+    r"Greek Film Festival:\s*",
+    r"Unsere Besten:\s*",
+    r"Clockwork Kubrick:\s*",
+    r"Stummfilm um Mitternacht:\s*",
+    r"CinemAperitivo:\s*",
+    r"Kinderwagenkino:\s*",
+    r"MoMo Berlin:\s*",
+    r"Free Friday:\s*",
+    r"Juliette Binoche:\s*",
+    r"Luchino Visconti:\s*",
+    r"Achtung Berlin:\s*",
+    r"Cicle Gaudí:\s*",
+    r"80 Jahre DEFA:\s*",
+    r"^[^:]+?am\s+(Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag):\s*",
+    r"VIETNAM:\s*",
+    r"THREE AMIGOS:\s*",
+    r"INDOGERMAN FILMWEEK:\s*",
+    r"SPECIAL:\s*",
+    r"(Klimareihe|OPEN AIR|OFFENE LEINWAND|REEL LOVE):\s*",
+    r"MONDO VIDEO\s+(?:I+V?):\s*",
+]
+
 
 class TMDBService:
-    def __init__(self, api_key: str, language: str = "de-DE"):
+    def __init__(
+        self,
+        api_key: str,
+        language: str = "de-DE",
+        title_prefix_patterns: Optional[list] = None,
+    ):
         self.api_key = api_key
         self.language = language
+        self.title_prefix_patterns = (
+            list(title_prefix_patterns)
+            if title_prefix_patterns
+            else list(DEFAULT_TITLE_PREFIX_PATTERNS)
+        )
         self._cache: dict[str, Optional[Tuple[str, int, str, str, int]]] = {}
         self._request_semaphore = asyncio.Semaphore(5)
+        self._client: Optional[httpx.AsyncClient] = None
+
+    async def _get_client(self) -> httpx.AsyncClient:
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=10)
+        return self._client
+
+    async def aclose(self) -> None:
+        if self._client is not None:
+            await self._client.aclose()
+            self._client = None
 
     async def _request_tmdb(
         self, url: str, params: dict, max_retries: int = 3
     ) -> httpx.Response:
+        client = await self._get_client()
         for attempt in range(max_retries):
             async with self._request_semaphore:
-                async with httpx.AsyncClient(timeout=10) as client:
-                    response = await client.get(url, params=params)
-                    if response.status_code == 429 and attempt < max_retries - 1:
-                        pass
-                    else:
-                        response.raise_for_status()
-                        return response
+                response = await client.get(url, params=params)
+                if response.status_code == 429 and attempt < max_retries - 1:
+                    pass
+                else:
+                    response.raise_for_status()
+                    return response
             if response.status_code == 429 and attempt < max_retries - 1:
                 wait = 2 ** (attempt + 1)
                 logger.warning(
@@ -106,37 +153,14 @@ class TMDBService:
         cleaned = re.sub(r"\s*LIVE\s*", " ", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"(?<=\s)-\s.*$", "", cleaned)
         cleaned = re.sub(r"\s*Babylon\s*$", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Greek Film Festival:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Unsere Besten:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Clockwork Kubrick:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(
-            r"Stummfilm um Mitternacht:\s*", "", cleaned, flags=re.IGNORECASE
-        )
-        cleaned = re.sub(r"CinemAperitivo:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Kinderwagenkino:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"MoMo Berlin:\s*", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(
             r"Modern Times\s*.*$", "Modern Times", cleaned, flags=re.IGNORECASE
         )
         cleaned = re.sub(
             r"City Lights\s*.*$", "City Lights", cleaned, flags=re.IGNORECASE
         )
-        cleaned = re.sub(r"Free Friday:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Juliette Binoche:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Luchino Visconti:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Achtung Berlin:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"Cicle Gaudí:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"80 Jahre DEFA:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(
-            r"^[^:]+?am\s+(Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag):\s*",
-            "", cleaned, flags=re.IGNORECASE
-        )
-        cleaned = re.sub(r"VIETNAM:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"THREE AMIGOS:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"INDOGERMAN FILMWEEK:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"SPECIAL:\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"(Klimareihe|OPEN AIR|OFFENE LEINWAND|REEL LOVE):\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"MONDO VIDEO\s+(?:I+V?):\s*", "", cleaned, flags=re.IGNORECASE)
+        for pattern in self.title_prefix_patterns:
+            cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"\s*\[.*?\]", "", cleaned)
         cleaned = re.sub(r"\s*with\s+Guests.*$", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"\s+", " ", cleaned)
@@ -183,7 +207,8 @@ class TMDBService:
         scraped_runtime: int = 0,
     ) -> Optional[Tuple[str, int, str, str, int]]:
         cache_key = (
-            f"{movie_title}|{expected_year}|{keep_original_title}|{original_title}"
+            f"{movie_title}|{expected_year}|{keep_original_title}"
+            f"|{original_title}|{scraped_runtime}"
         )
         if cache_key in self._cache:
             return self._cache[cache_key]

@@ -8,7 +8,16 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger(__name__)
 
-locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
+for _locale_name in ("de_DE.UTF-8", "de_DE", "German_Germany.1252", "German"):
+    try:
+        locale.setlocale(locale.LC_TIME, _locale_name)
+        break
+    except locale.Error:
+        continue
+else:
+    logger.warning(
+        "No German locale available, falling back to default date formatting"
+    )
 
 
 class NewsletterGenerator:
@@ -25,6 +34,7 @@ class NewsletterGenerator:
         output_path: Optional[str] = None,
         threshold_year: int = 2010,
         cinema_config: Optional[dict] = None,
+        rendered_cinemas: Optional[list] = None,
     ) -> str:
         classical_screenings = [
             s
@@ -33,12 +43,30 @@ class NewsletterGenerator:
             and (s.year <= threshold_year or getattr(s, "skip_year_filter", False))
         ]
 
+        by_cinema: dict[str, list] = {}
+        for s in classical_screenings:
+            by_cinema.setdefault(s.cinema_name, []).append(s)
+        config_cinemas = (cinema_config or {}).get("cinemas", [])
+        maps_by_name = {c.get("name"): c.get("google_maps_url") for c in config_cinemas}
+        grouped_screenings = [
+            {
+                "name": name,
+                "screenings": sorted(items, key=lambda s: s.date.replace(tzinfo=None)),
+                "maps_url": maps_by_name.get(name) or "",
+            }
+            for name, items in sorted(by_cinema.items())
+        ]
+
         template = self.env.get_template("newsletter.html")
         html = template.render(
             screenings=classical_screenings,
+            grouped_screenings=grouped_screenings,
             generated_at=datetime.now(),
             threshold_year=threshold_year,
             cinema_config=cinema_config or {},
+            rendered_cinemas=(
+                rendered_cinemas if rendered_cinemas is not None else config_cinemas
+            ),
         )
 
         if output_path:

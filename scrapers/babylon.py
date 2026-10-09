@@ -49,6 +49,23 @@ def _strip_festival_prefix(movie_title: str, event) -> str:
     return movie_title
 
 
+def resolve_screening_date(day: str, month: str, time_str: str, now: datetime) -> datetime:
+    """Build a screening datetime from a year-less DD.MM. + time pair.
+
+    The Babylon program lists upcoming events, so a date that already lies
+    in the past belongs to next year (Dec program showing January dates).
+    """
+    screening_date = datetime.strptime(
+        f"{day}.{month}.{now.year} {time_str}", "%d.%m.%Y %H:%M"
+    )
+    if screening_date.date() < now.date():
+        try:
+            screening_date = screening_date.replace(year=now.year + 1)
+        except ValueError:
+            logger.warning(f"Year rollover failed for {day}.{month}, keeping {now.year}")
+    return screening_date
+
+
 class BabylonScraper(BaseScraper):
     def __init__(
         self,
@@ -86,14 +103,21 @@ class BabylonScraper(BaseScraper):
             match = re.search(r"(\d{2})\.(\d{2})\.?\s*(\d{2}:\d{2})", date_str)
             if match:
                 day, month, time_str = match.groups()
-                year = datetime.now().year
                 try:
-                    screening_date = datetime.strptime(
-                        f"{day}.{month}.{year} {time_str}", "%d.%m.%Y %H:%M"
+                    screening_date = resolve_screening_date(
+                        day, month, time_str, datetime.now()
                     )
                 except ValueError:
+                    logger.warning(
+                        f"Unparseable Babylon date '{date_str}' "
+                        f"for '{movie_title}', falling back to today 20:00"
+                    )
                     screening_date = datetime.now().replace(hour=20, minute=0)
             else:
+                logger.warning(
+                    f"No Babylon date found in '{date_str}' "
+                    f"for '{movie_title}', falling back to today 20:00"
+                )
                 screening_date = datetime.now().replace(hour=20, minute=0)
 
             url = link_elem.get("href") if link_elem else None
