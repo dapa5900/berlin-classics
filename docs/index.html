@@ -196,36 +196,47 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 18px rgba(212,175,55,0.25);
         }
         .new-badge {
-            font-family: 'Cinzel', Georgia, serif;
-            font-size: 0.7em;
-            font-weight: 700;
-            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
             color: #0d080c;
             background: linear-gradient(135deg, #E5C158 0%, #D4AF37 100%);
-            border-radius: 3px;
-            padding: 2px 7px;
-            margin-left: 0;
-            vertical-align: middle;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .card-header {
             width: 100%;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 8px;
             padding-bottom: 12px;
             margin-bottom: 12px;
             border-bottom: 1px solid rgba(212,175,55,0.3);
         }
         .card-header-left {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 0;
+        }
+        .card-header-left .gcal-btn {
+            margin-top: 2px;
+            flex-shrink: 0;
         }
         .card-header-text {
             display: flex;
             flex-direction: column;
             line-height: 1.3;
+            min-width: 0;
+        }
+        .card-actions {
+            flex-shrink: 0;
         }
         .poster-link {
             display: block;
@@ -311,25 +322,6 @@
             width: 16px;
             height: 16px;
             fill: #D4AF37;
-        }
-        .btn-plus {
-            position: relative;
-        }
-        .btn-plus::after {
-            content: '+';
-            position: absolute;
-            right: -5px;
-            bottom: -5px;
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            background: #0d080c;
-            border: 1px solid #D4AF37;
-            color: #D4AF37;
-            font-size: 10px;
-            line-height: 11px;
-            text-align: center;
-            font-weight: bold;
         }
         .date-divider {
             font-size: 0.85em;
@@ -466,7 +458,7 @@
                 height: 32px;
             }
             .card-header-left {
-                gap: 6px;
+                gap: 8px;
             }
             .break-after::after {
                 content: "\a";
@@ -806,7 +798,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Riss"
                                             data-year="1970"
                                             data-date="2026-10-08"
@@ -818,6 +810,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/4266">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -831,7 +824,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -858,7 +851,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Cocktail für eine Leiche"
                                             data-year="1948"
                                             data-date="2026-10-08"
@@ -870,6 +863,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/1580">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -883,7 +877,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -910,7 +904,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Quatre nuits d&#39;un rêveur"
                                             data-year="1972"
                                             data-date="2026-10-08"
@@ -922,6 +916,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/55847">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -935,7 +930,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -962,7 +957,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Teufel möglicherweise"
                                             data-year="1977"
                                             data-date="2026-10-08"
@@ -974,6 +969,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/32097">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -987,7 +983,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1014,7 +1010,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Vertigo - Aus dem Reich der Toten"
                                             data-year="1958"
                                             data-date="2026-10-08"
@@ -1026,6 +1022,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/426">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1039,7 +1036,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1066,7 +1063,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der unsichtbare Dritte"
                                             data-year="1959"
                                             data-date="2026-10-08"
@@ -1078,6 +1075,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/213">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1091,7 +1089,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1118,7 +1116,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Das Fenster zum Hof"
                                             data-year="1954"
                                             data-date="2026-10-08"
@@ -1130,6 +1128,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/567">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1143,7 +1142,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1170,7 +1169,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Bei Anruf Mord"
                                             data-year="1954"
                                             data-date="2026-10-09"
@@ -1182,6 +1181,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/521">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1195,7 +1195,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1222,7 +1222,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Lancelot, Ritter der Königin"
                                             data-year="1974"
                                             data-date="2026-10-09"
@@ -1234,6 +1234,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/55848">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1247,7 +1248,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1274,7 +1275,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Prozeß der Jeanne d&#39;Arc"
                                             data-year="1963"
                                             data-date="2026-10-09"
@@ -1286,6 +1287,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/48764">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1299,7 +1301,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1326,7 +1328,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Vertigo - Aus dem Reich der Toten"
                                             data-year="1958"
                                             data-date="2026-10-09"
@@ -1338,6 +1340,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/426">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1351,7 +1354,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1378,7 +1381,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Das Geld"
                                             data-year="1983"
                                             data-date="2026-10-09"
@@ -1390,6 +1393,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/42112">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1403,7 +1407,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1430,7 +1434,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Damen vom Bois de Boulogne"
                                             data-year="1945"
                                             data-date="2026-10-09"
@@ -1442,6 +1446,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/49845">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1455,7 +1460,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1482,7 +1487,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Psycho"
                                             data-year="1960"
                                             data-date="2026-10-09"
@@ -1494,6 +1499,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/539">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1507,7 +1513,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1534,7 +1540,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Frenzy"
                                             data-year="1972"
                                             data-date="2026-10-09"
@@ -1546,6 +1552,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/573">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1559,7 +1566,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1586,7 +1593,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Schlachter"
                                             data-year="1970"
                                             data-date="2026-10-09"
@@ -1598,6 +1605,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/2912">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1611,7 +1619,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1638,7 +1646,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Sideways"
                                             data-year="2004"
                                             data-date="2026-10-09"
@@ -1650,6 +1658,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/9675">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1663,7 +1672,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1690,7 +1699,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Saboteure"
                                             data-year="1942"
                                             data-date="2026-10-10"
@@ -1702,6 +1711,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/31997">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1715,7 +1725,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1742,7 +1752,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Himmel über Berlin"
                                             data-year="1987"
                                             data-date="2026-10-10"
@@ -1754,6 +1764,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/144">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1767,7 +1778,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1794,7 +1805,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Das Hohelied der Liebe"
                                             data-year="1943"
                                             data-date="2026-10-10"
@@ -1806,6 +1817,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/55835">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1819,7 +1831,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1846,7 +1858,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Vögel"
                                             data-year="1963"
                                             data-date="2026-10-10"
@@ -1858,6 +1870,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/571">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1871,7 +1884,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1898,7 +1911,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Zum Beispiel Balthazar"
                                             data-year="1966"
                                             data-date="2026-10-10"
@@ -1910,6 +1923,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/20108">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1923,7 +1937,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -1950,7 +1964,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der unsichtbare Dritte"
                                             data-year="1959"
                                             data-date="2026-10-10"
@@ -1962,6 +1976,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/213">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -1975,7 +1990,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2002,7 +2017,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Eine Frauensache"
                                             data-year="1988"
                                             data-date="2026-10-10"
@@ -2014,6 +2029,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/41975">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2027,7 +2043,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2054,7 +2070,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Mieter"
                                             data-year="1927"
                                             data-date="2026-10-10"
@@ -2066,6 +2082,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/2760">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2079,7 +2096,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2106,7 +2123,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Immer Ärger mit Harry"
                                             data-year="1955"
                                             data-date="2026-10-11"
@@ -2118,6 +2135,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/11219">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2131,7 +2149,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2158,7 +2176,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Sabotage"
                                             data-year="1936"
                                             data-date="2026-10-11"
@@ -2170,6 +2188,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/12684">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2183,7 +2202,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2210,7 +2229,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Riss"
                                             data-year="1970"
                                             data-date="2026-10-11"
@@ -2222,6 +2241,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/4266">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2235,7 +2255,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2262,7 +2282,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Lancelot, Ritter der Königin"
                                             data-year="1974"
                                             data-date="2026-10-11"
@@ -2274,6 +2294,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/55848">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2287,7 +2308,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2314,7 +2335,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Unbefriedigten"
                                             data-year="1960"
                                             data-date="2026-10-11"
@@ -2326,6 +2347,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/27419">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2339,7 +2361,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2366,7 +2388,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Das Fenster zum Hof"
                                             data-year="1954"
                                             data-date="2026-10-11"
@@ -2378,6 +2400,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/567">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2391,7 +2414,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2418,7 +2441,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Schlachter"
                                             data-year="1970"
                                             data-date="2026-10-11"
@@ -2430,6 +2453,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/2912">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2443,7 +2467,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2470,7 +2494,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Psycho"
                                             data-year="1960"
                                             data-date="2026-10-11"
@@ -2482,6 +2506,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/539">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2495,7 +2520,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2522,7 +2547,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Cocktail für eine Leiche"
                                             data-year="1948"
                                             data-date="2026-10-12"
@@ -2534,6 +2559,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/1580">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2547,7 +2573,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2574,7 +2600,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Saboteure"
                                             data-year="1942"
                                             data-date="2026-10-12"
@@ -2586,6 +2612,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/31997">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2599,7 +2626,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2626,7 +2653,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Bei Anruf Mord"
                                             data-year="1954"
                                             data-date="2026-10-12"
@@ -2638,6 +2665,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/521">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2651,7 +2679,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2678,7 +2706,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Vögel"
                                             data-year="1963"
                                             data-date="2026-10-12"
@@ -2690,6 +2718,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/571">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2703,7 +2732,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2730,7 +2759,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Frenzy"
                                             data-year="1972"
                                             data-date="2026-10-12"
@@ -2742,6 +2771,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/573">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2755,7 +2785,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2782,7 +2812,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Biester"
                                             data-year="1995"
                                             data-date="2026-10-12"
@@ -2794,6 +2824,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/1802">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2807,7 +2838,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2834,7 +2865,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Berüchtigt"
                                             data-year="1946"
                                             data-date="2026-10-12"
@@ -2846,6 +2877,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/303">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2859,7 +2891,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2886,7 +2918,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Rebecca"
                                             data-year="1940"
                                             data-date="2026-10-12"
@@ -2898,6 +2930,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/223">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2911,7 +2944,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2938,7 +2971,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Ich kämpfe um Dich"
                                             data-year="1945"
                                             data-date="2026-10-12"
@@ -2950,6 +2983,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/4174">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -2963,7 +2997,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -2990,7 +3024,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Ich beichte"
                                             data-year="1953"
                                             data-date="2026-10-13"
@@ -3002,6 +3036,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/30159">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3015,7 +3050,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3042,7 +3077,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Alice - Im Wunderland der bösen Träume"
                                             data-year="1977"
                                             data-date="2026-10-13"
@@ -3054,6 +3089,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/32722">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3067,7 +3103,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3094,7 +3130,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Eine Frauensache"
                                             data-year="1988"
                                             data-date="2026-10-13"
@@ -3106,6 +3142,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/41975">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3119,7 +3156,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3146,7 +3183,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Vertigo - Aus dem Reich der Toten"
                                             data-year="1958"
                                             data-date="2026-10-13"
@@ -3158,6 +3195,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/426">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3171,7 +3209,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3198,7 +3236,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Immer Ärger mit Harry"
                                             data-year="1955"
                                             data-date="2026-10-13"
@@ -3210,6 +3248,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/11219">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3223,7 +3262,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3250,7 +3289,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Unbefriedigten"
                                             data-year="1960"
                                             data-date="2026-10-13"
@@ -3262,6 +3301,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/27419">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3275,7 +3315,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3302,7 +3342,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Riss"
                                             data-year="1970"
                                             data-date="2026-10-14"
@@ -3314,6 +3354,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/4266">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3327,7 +3368,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3354,7 +3395,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Bei Anruf Mord"
                                             data-year="1954"
                                             data-date="2026-10-14"
@@ -3366,6 +3407,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/521">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3379,7 +3421,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3406,7 +3448,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Schlachter"
                                             data-year="1970"
                                             data-date="2026-10-14"
@@ -3418,6 +3460,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/2912">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3431,7 +3474,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3458,7 +3501,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Das Fenster zum Hof"
                                             data-year="1954"
                                             data-date="2026-10-14"
@@ -3470,6 +3513,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/567">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3483,7 +3527,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3510,7 +3554,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Vögel"
                                             data-year="1963"
                                             data-date="2026-10-14"
@@ -3522,6 +3566,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/571">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3535,7 +3580,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3562,7 +3607,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Cocktail für eine Leiche"
                                             data-year="1948"
                                             data-date="2026-10-14"
@@ -3574,6 +3619,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/1580">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3587,7 +3633,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3614,7 +3660,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Wir sind die Besten!"
                                             data-year="2013"
                                             data-date="2026-10-22"
@@ -3626,6 +3672,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/191294">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3639,7 +3686,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3666,7 +3713,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Exorzist"
                                             data-year="1973"
                                             data-date="2026-10-29"
@@ -3678,6 +3725,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/9552">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3691,7 +3739,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3718,7 +3766,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Nader und Simin - eine Trennung"
                                             data-year="2011"
                                             data-date="2026-10-29"
@@ -3730,6 +3778,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/60243">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3743,7 +3792,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3770,7 +3819,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Halloween - Die Nacht des Grauens"
                                             data-year="1978"
                                             data-date="2026-10-31"
@@ -3782,6 +3831,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/948">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3795,7 +3845,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3822,7 +3872,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Halloween - Die Nacht des Grauens"
                                             data-year="1978"
                                             data-date="2026-10-31"
@@ -3834,6 +3884,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/948">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3847,7 +3898,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3874,7 +3925,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Halloween II - Das Grauen kehrt zurück"
                                             data-year="1981"
                                             data-date="2026-10-31"
@@ -3886,6 +3937,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/11281">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3899,7 +3951,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3926,7 +3978,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Halloween II - Das Grauen kehrt zurück"
                                             data-year="1981"
                                             data-date="2026-10-31"
@@ -3938,6 +3990,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/11281">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -3951,7 +4004,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -3978,7 +4031,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Das Omen"
                                             data-year="1976"
                                             data-date="2026-11-03"
@@ -3990,6 +4043,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/794">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4003,7 +4057,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4030,7 +4084,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Ponyo - Das große Abenteuer am Meer"
                                             data-year="2008"
                                             data-date="2026-11-05"
@@ -4042,6 +4096,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/12429">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4055,7 +4110,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4082,7 +4137,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Praia do Futuro"
                                             data-year="2014"
                                             data-date="2026-11-11"
@@ -4094,6 +4149,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/227975">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4107,7 +4163,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4134,7 +4190,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Song of Hiawatha"
                                             data-year="1997"
                                             data-date="2026-11-21"
@@ -4146,6 +4202,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/189418">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4159,7 +4216,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4186,7 +4243,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Bruder"
                                             data-year="1997"
                                             data-date="2026-11-27"
@@ -4198,6 +4255,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/20992">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4211,7 +4269,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4238,7 +4296,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Морфий"
                                             data-year="2008"
                                             data-date="2026-11-28"
@@ -4250,6 +4308,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/51284">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4263,7 +4322,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4290,7 +4349,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Груз 200"
                                             data-year="2007"
                                             data-date="2026-11-29"
@@ -4302,6 +4361,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/34869">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4315,7 +4375,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4342,7 +4402,7 @@
                         <article class="screening-card is-new">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Persepolis"
                                             data-year="2007"
                                             data-date="2026-12-03"
@@ -4354,6 +4414,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/2011">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4367,7 +4428,7 @@
                                     </div>
                                 </div>
                                 <div class="card-actions">
-                                    <span class="new-badge">NEU</span>
+                                    <span class="new-badge" title="Neu hinzugefügt">&#10022;</span>
                                 </div>
                             </div>
                             
@@ -4404,7 +4465,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Pans Labyrinth"
                                             data-year="2006"
                                             data-date="2026-10-06"
@@ -4416,6 +4477,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/1417">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4456,7 +4518,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Liebe braucht keine Ferien"
                                             data-year="2006"
                                             data-date="2026-12-01"
@@ -4468,6 +4530,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/1581">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4518,7 +4581,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Nightmare II - Die Rache"
                                             data-year="1985"
                                             data-date="2026-11-01"
@@ -4530,6 +4593,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/10014">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4580,7 +4644,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Vater der Braut"
                                             data-year="1950"
                                             data-date="2026-10-11"
@@ -4592,6 +4656,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/20758">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4632,7 +4697,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Monster AG"
                                             data-year="2001"
                                             data-date="2026-10-20"
@@ -4644,6 +4709,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/585">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4684,7 +4750,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Ghostbusters - Die Geisterjäger"
                                             data-year="1984"
                                             data-date="2026-10-24"
@@ -4696,6 +4762,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/620">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4736,7 +4803,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="So grün war mein Tal"
                                             data-year="1941"
                                             data-date="2026-10-25"
@@ -4748,6 +4815,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/43266">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4788,7 +4856,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Herr der Ringe - Die Gefährten"
                                             data-year="2001"
                                             data-date="2026-10-31"
@@ -4800,6 +4868,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/120">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4840,7 +4909,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Halloween - Die Nacht des Grauens"
                                             data-year="1978"
                                             data-date="2026-10-31"
@@ -4852,6 +4921,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/948">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4892,7 +4962,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Das Haus der Lady Alquist"
                                             data-year="1944"
                                             data-date="2026-11-01"
@@ -4904,6 +4974,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/13528">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4944,7 +5015,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Herr der Ringe - Die Gefährten"
                                             data-year="2001"
                                             data-date="2026-11-01"
@@ -4956,6 +5027,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/120">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -4996,7 +5068,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Hostess"
                                             data-year="1976"
                                             data-date="2026-11-03"
@@ -5008,6 +5080,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/2209">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5048,7 +5121,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Herr der Ringe - Die zwei Türme"
                                             data-year="2002"
                                             data-date="2026-11-07"
@@ -5060,6 +5133,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/121">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5100,7 +5174,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Herr der Ringe - Die zwei Türme"
                                             data-year="2002"
                                             data-date="2026-11-08"
@@ -5112,6 +5186,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/121">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5152,7 +5227,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Forrest Gump"
                                             data-year="1994"
                                             data-date="2026-11-11"
@@ -5164,6 +5239,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/13">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5204,7 +5280,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Herr der Ringe - Die Rückkehr des Königs"
                                             data-year="2003"
                                             data-date="2026-11-14"
@@ -5216,6 +5292,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/122">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5256,7 +5333,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Schwester der Braut"
                                             data-year="1938"
                                             data-date="2026-11-15"
@@ -5268,6 +5345,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/16274">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5308,7 +5386,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Der Herr der Ringe - Die Rückkehr des Königs"
                                             data-year="2003"
                                             data-date="2026-11-15"
@@ -5320,6 +5398,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/122">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5360,7 +5439,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Jenseits von Afrika"
                                             data-year="1985"
                                             data-date="2026-11-28"
@@ -5372,6 +5451,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/606">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5412,7 +5492,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Vom Winde verweht"
                                             data-year="1939"
                                             data-date="2026-11-29"
@@ -5424,6 +5504,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/770">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5464,7 +5545,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die 1000 Augen des Dr. Mabuse"
                                             data-year="1960"
                                             data-date="2026-12-01"
@@ -5476,6 +5557,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/19128">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5516,7 +5598,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Die Unbestechlichen"
                                             data-year="1976"
                                             data-date="2026-12-13"
@@ -5528,6 +5610,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/891">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5568,7 +5651,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Titanic"
                                             data-year="1997"
                                             data-date="2026-12-14"
@@ -5580,6 +5663,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/597">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5620,7 +5704,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Ist das Leben nicht schön?"
                                             data-year="1946"
                                             data-date="2026-12-20"
@@ -5632,6 +5716,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/1585">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5672,7 +5757,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="Is&#39; was, Doc"
                                             data-year="1972"
                                             data-date="2026-12-31"
@@ -5684,6 +5769,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/6949">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5724,7 +5810,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="England!"
                                             data-year="2000"
                                             data-date="2027-01-05"
@@ -5736,6 +5822,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/12570">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5776,7 +5863,7 @@
                         <article class="screening-card">
                             <div class="card-header">
                                 <div class="card-header-left">
-                                    <button type="button" class="gcal-btn btn-plus" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
+                                    <button type="button" class="gcal-btn" title="In Google Kalender speichern" onclick="addSingleToGCal(this)"
                                             data-title="The Untouchables - Die Unbestechlichen"
                                             data-year="1987"
                                             data-date="2027-01-16"
@@ -5788,6 +5875,7 @@
                                             data-tmdb-url="https://www.themoviedb.org/movie/117">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                                            <path d="M13.5 14.5h1.5V12h2v2.5h1.5v2H17v2.5h-2v-2.5h-1.5v-2z"/>
                                         </svg>
                                     </button>
                                     <div class="card-header-text">
@@ -5840,7 +5928,7 @@
     </div>
 
         <footer>
-            <p class="meta">Generiert am 09.10.2026 um 08:21</p>
+            <p class="meta">Generiert am 09.10.2026 um 08:46</p>
             <p>Filmscreening-Daten von <a href="https://babylonberlin.eu/programm" target="_blank" style="color: #D4AF37;">Babylon</a>, <a href="https://www.bestofcinema.de/" target="_blank" style="color: #D4AF37;">Best of Cinema</a>, <a href="https://www.filmrausch.de/" target="_blank" style="color: #D4AF37;">Filmrausch</a>, <a href="https://openair-kino.net/category/berlin/" target="_blank" style="color: #D4AF37;">Open Air Cinema</a> und <a href="https://zoopalast.premiumkino.de/programm" target="_blank" style="color: #D4AF37;">Zoo Palast</a></p>
         </footer>
     </div>
