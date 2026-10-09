@@ -133,3 +133,76 @@ class TestFilterNoTmdb:
         ]
         result = filter_no_tmdb(screenings)
         assert len(result) == 2
+
+
+class TestNewFlags:
+    """Tests for the new-screening detection and snapshot history."""
+
+    def _make_screening(
+        self, title="Jaws", cinema="Babylon", date=None, venue=None,
+    ) -> Screening:
+        return Screening(
+            cinema_name=cinema,
+            movie_title=title,
+            date=date or datetime(2026, 10, 10, 20, 15),
+            year=1975,
+            venue_name=venue,
+        )
+
+    def test_screening_key_uses_venue(self):
+        from main import screening_key
+
+        a = self._make_screening(venue="Freiluftbühne")
+        b = self._make_screening(venue="Anderer Ort")
+        assert screening_key(a) != screening_key(b)
+        c = self._make_screening()
+        d = self._make_screening()
+        assert screening_key(c) == screening_key(d)
+
+    def test_apply_new_flags_empty_baseline_marks_nothing(self):
+        from main import apply_new_flags
+
+        screenings = [self._make_screening()]
+        apply_new_flags(screenings, set())
+        assert screenings[0].is_new is False
+
+    def test_apply_new_flags(self):
+        from main import apply_new_flags, screening_key
+
+        known = self._make_screening()
+        new_date = self._make_screening(date=datetime(2026, 10, 11, 20, 15))
+        new_cinema = self._make_screening(cinema="Zoo Palast")
+        screenings = [known, new_date, new_cinema]
+        apply_new_flags(screenings, {screening_key(known)})
+        assert known.is_new is False
+        assert new_date.is_new is True
+        assert new_cinema.is_new is True
+
+    def test_snapshot_roundtrip_and_rotation(self, tmp_path, monkeypatch):
+        import main
+        from main import load_baseline_keys, screening_key
+
+        monkeypatch.setattr(main, "SNAPSHOT_DIR", tmp_path)
+        assert load_baseline_keys("2026-10-08") == set()
+
+        old = [self._make_screening()]
+        main.save_snapshot(old, "2026-09-30")
+        assert (tmp_path / "screenings_2026-09-30.json").exists()
+
+        current = [self._make_screening(), self._make_screening("Jaws 2")]
+        main.save_snapshot(current, "2026-10-07")
+
+        # Baseline = youngest snapshot older than today
+        assert load_baseline_keys("2026-10-07") == {
+            screening_key(s) for s in old
+        }
+
+        main.save_snapshot(current, "2026-10-08")
+
+        # 8-day-old snapshot pruned, 8-day window kept
+        assert not (tmp_path / "screenings_2026-09-30.json").exists()
+        assert (tmp_path / "screenings_2026-10-07.json").exists()
+        assert (tmp_path / "screenings_2026-10-08.json").exists()
+
+        baseline = load_baseline_keys("2026-10-08")
+        assert baseline == {screening_key(s) for s in current}

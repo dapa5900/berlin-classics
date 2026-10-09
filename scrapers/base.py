@@ -22,6 +22,7 @@ class Screening:
     venue_name: Optional[str] = None
     production_year: Optional[int] = None
     original_title: Optional[str] = None
+    is_new: bool = False
 
 
 class BaseScraper:

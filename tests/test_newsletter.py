@@ -128,8 +128,20 @@ class TestNewsletterGenerator:
         assert "gcal-btn" in html
         assert "addSingleToGCal" in html
         assert "calendar.google.com/calendar/render?action=TEMPLATE" in html
+        # New films hook the poster glow via is-new, no badge/chip elements
+        assert "is-new" in html
+        assert "new-badge" not in html
         # ICS export is removed: no checkboxes, no ICS builder, no download
         assert "movie-select" not in html
         assert "exportToCalendar" not in html
         assert "exportToGCal" not in html
         assert "berlin-classics-events.ics" not in html
+        # Date icon replaced by the Google button, no dead references
+        assert "date-icon" not in html
+        assert "btn-plus" not in html
+        assert "card-actions" not in html
+        # Short mobile date variant rendered alongside the full date
+        assert "card-date-short" in html
+        # TMDB link lives in the title row (same typography as year), not the time row
+        assert "tmdb-link-title" in html
+        assert 'class="tmdb-link"' not in html

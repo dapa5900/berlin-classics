@@ -13,7 +13,7 @@
 | Text muted | `#c9c4bb` | Subtitle |
 | Text dim | `#7a756d` / `#a8a29e` / `#a09890` | Meta, screening details |
 | Link hover | `#E5C158` | Lighter gold on button hover |
-| Card BG | `rgba(25,15,20,0.9)` → `rgba(15,08,12,0.95)` | Gradient overlay |
+| Card BG | `rgba(38,24,30,0.92)` → `rgba(12,6,10,0.96)` | Vertical card gradient (lighter top, darker bottom) |
 | Section BG | `rgba(30,18,25,0.8)` → `rgba(18,10,15,0.9)` | Lighter gradient overlay |
 
 ## Typography
@@ -45,14 +45,13 @@ Body line-height: `1.7`.
 │   │   ├── ::before pseudo "❋"
 │   │   └── span.toggle-icon "+" / "−"
 │   └── div.cinema-screenings (initially hidden, display: grid)
-│       └── article.screening-card × M
-│           ├── div.card-header
-│           │   ├── div.card-date (calendar SVG icon + "So, 31.05.2026")
-│           │   └── div.card-actions (Google-Calendar button for export)
+│       └── article.screening-card × M (vertical gradient: lighter top → darker bottom)
+│           ├── div.card-header (flex-start, gap 8px)
+│           │   └── div.card-header-left: Google-Calendar button (doubles as date indicator) + date/time text (min-width 0; ≤600px: short date `Do, 08.10.26` via `.card-date-short` at 0.95em)
 │           ├── a.poster-link → img.poster (2:3, max 180px wide)
 │           │   └── OR div.poster-placeholder (gold gradient, "BERLIN\nCLASSICS")
 │           └── div.screening-info (centered text)
-│               └── h3.movie-title → a (links to cinema page) + span.year
+│               └── h3.movie-title → a (links to cinema page) + span.year-tmdb (nowrap: year + `· TMDB` link, 0.85em/400 to match year digits)
 └── footer (centered, border-top)
 ```
 
@@ -65,7 +64,7 @@ Body line-height: `1.7`.
 |---|---|---|
 | >900px | **3 columns** `1fr`, gap `20px` | Default |
 | 600–900px | **2 columns** | – |
-| ≤600px | **1 column** | `h1` → `2.2em`, `letter-spacing: 4px`, body padding `20px 15px`, section padding `22px`, floating buttons → right side, gcal-btn → `32px` |
+| ≤600px | **1 column** | `h1` → `2.2em`, `letter-spacing: 4px`, body padding `20px 15px`, section padding `22px`, floating buttons → right side |
 
 ## Spacing & Sizing
 
@@ -84,7 +83,8 @@ Body line-height: `1.7`.
 - **Card hover**: `translateY(-3px)`, gold box-shadow intensifies, border brightens.
 - **Movie title link hover**: Turns gold `#D4AF37`.
 - **Poster link**: Wraps poster in `<a>` to cinema page, no underline decoration.
-- **Per-card Google button** (`.gcal-btn` in `.card-actions`, 28px / 32px mobile, transparent with gold border + "+" badge): opens one prefilled Google-Calendar event for that screening in a new tab (`calendar.google.com/calendar/render?action=TEMPLATE`, times converted Berlin-local → UTC, all-day as `YYYYMMDD/YYYYMMDD`). No checkboxes, no ICS export.
+- **Per-card Google button** (`.gcal-btn` 34px, borderless, calendar-plus icon with centered plus): opens one prefilled Google-Calendar event for that screening in a new tab (`calendar.google.com/calendar/render?action=TEMPLATE`, times converted Berlin-local → UTC, all-day as `YYYYMMDD/YYYYMMDD`). Doubles as the date indicator. No checkboxes, no ICS export.
+- **New-poster-glow** (`.is-new .poster`, gold glow + gold border): screenings whose `(title, venue, date)` key is absent from the youngest snapshot older than today render with a subtle golden glow on the poster thumbnail only. First run without history marks nothing. Header uses `flex-start` top alignment with shrinkable date text so narrow cards never overflow.
 
 ## Visual Effects
 
@@ -98,6 +98,7 @@ Body line-height: `1.7`.
 ## Content Logic (backend-driven)
 
 - Screenings grouped by `cinema_name`, sorted by date
+- `is_new` screenings carry a gold "NEU" badge (see above); baseline = youngest `cache/snapshots/` entry older than today (8-day rotation, keys-light: title/venue/date/year/TMDB URL)
 - Special handling for "Best of Cinema" → shows "Ganztägig" instead of time
 - Special handling for Open Air Kino → `venue_name` used as grouping label per screening
 - Posters sourced from TMDB; if missing → gold placeholder with "BERLIN CLASSICS" text

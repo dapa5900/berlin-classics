@@ -117,6 +117,79 @@ async def enrich_screenings(
 CACHE_DIR = Path("cache")
 CACHE_FILE = CACHE_DIR / "screenings.json"
 CACHE_ENRICHED_FILE = CACHE_DIR / "screenings_enriched.json"
+SNAPSHOT_DIR = CACHE_DIR / "snapshots"
+SNAPSHOT_KEEP_DAYS = 8
+
+
+def screening_key(screening: Screening) -> tuple:
+    venue = screening.venue_name or screening.cinema_name
+    return (screening.movie_title, venue, screening.date.isoformat())
+
+
+def snapshot_entry(screening: Screening) -> dict:
+    venue = screening.venue_name or screening.cinema_name
+    return {
+        "movie_title": screening.movie_title,
+        "venue": venue,
+        "date": screening.date.isoformat(),
+        "year": screening.year,
+        "tmdb_url": screening.tmdb_url,
+    }
+
+
+def _snapshot_path_for(day: str) -> Path:
+    return SNAPSHOT_DIR / f"screenings_{day}.json"
+
+
+def load_baseline_keys(today: str) -> set[tuple]:
+    """Keys of the youngest snapshot older than today (empty if none)."""
+    if not SNAPSHOT_DIR.exists():
+        return set()
+    candidates = sorted(SNAPSHOT_DIR.glob("screenings_*.json"))
+    previous = [p for p in candidates if p.stem != f"screenings_{today}"]
+    if not previous:
+        return set()
+    try:
+        data = json.loads(previous[-1].read_text(encoding="utf-8"))
+        return {(e["movie_title"], e["venue"], e["date"]) for e in data}
+    except Exception as e:
+        logger.warning(f"Failed to load baseline snapshot: {e}")
+        return set()
+
+
+def apply_new_flags(
+    screenings: list[Screening], baseline_keys: set[tuple]
+) -> list[Screening]:
+    if not baseline_keys:
+        return screenings
+    baseline = set(baseline_keys)
+    for s in screenings:
+        s.is_new = screening_key(s) not in baseline
+    return screenings
+
+
+def save_snapshot(screenings: list[Screening], today: str) -> None:
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    data = [snapshot_entry(s) for s in screenings]
+    _snapshot_path_for(today).write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    logger.info(f"Saved snapshot with {len(data)} screenings for {today}")
+    try:
+        today_date = datetime.strptime(today, "%Y-%m-%d").date()
+    except ValueError:
+        return
+    for old in sorted(SNAPSHOT_DIR.glob("screenings_*.json")):
+        day = old.stem.replace("screenings_", "", 1)
+        try:
+            age = (
+                today_date - datetime.strptime(day, "%Y-%m-%d").date()
+            ).days
+        except ValueError:
+            continue
+        if age >= SNAPSHOT_KEEP_DAYS:
+            old.unlink()
+            logger.info(f"Removed old snapshot: {old.name}")
 
 
 def _cleanup_old_newsletters(output_dir: str) -> None:
@@ -321,12 +394,14 @@ def _render_newsletter(
         })
 
     generator = NewsletterGenerator()
+    apply_new_flags(screenings, load_baseline_keys(today))
     generator.generate(
         screenings=screenings,
         output_path=str(output_path),
         threshold_year=threshold_year,
         cinema_config=cinema_config,
     )
+    save_snapshot(screenings, today)
 
 
 async def main_async():
