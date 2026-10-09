@@ -41,15 +41,17 @@ All `.bat` files delegate to `scripts\run_timed.bat` which activates venv, runs 
 ## Pipeline
 
 ```
-scrape → cache/screenings.json → title filters → TMDB enrich → filter_no_tmdb → cache/screenings_enriched.json → year filter → newsletter
+scrape → cache/screenings.json → title filters → TMDB enrich → filter_no_tmdb → cache/screenings_enriched.json → year filter → new-flags → newsletter → snapshot
 ```
 
 - **Raw cache** (`cache/screenings.json`): scraper output before TMDB.
 - **Rich cache** (`cache/screenings_enriched.json`): after TMDB, before year/title filters.
+- **Snapshot history** (`cache/snapshots/screenings_YYYY-MM-DD.json`, 8-day rotation): keys-light of the RENDERED classics set (`movie_title`, `venue`, `date`, `year`, `tmdb_url`). Written by `_render_newsletter` after every render (all modes incl. `--fast`). Baseline for `is_new` = youngest snapshot older than today; no baseline → nothing flagged.
+- **New detection**: `screening_key()` = `(movie_title, venue_name or cinema_name, date.isoformat())`. New screening date/venue of a known film counts as new. `Screening.is_new` renders as poster glow (`.is-new .poster`), no badge element.
 
 ## Architecture
 
-- `Screening` dataclass (`scrapers/base.py`): `cinema_name`, `movie_title`, `date`, `url`, `year`, `poster_url`, `tmdb_url`, `skip_year_filter`, `runtime`, `venue_name`, `production_year`, `original_title`
+- `Screening` dataclass (`scrapers/base.py`): `cinema_name`, `movie_title`, `date`, `url`, `year`, `poster_url`, `tmdb_url`, `skip_year_filter`, `runtime`, `venue_name`, `production_year`, `original_title`, `is_new`
 - TMDB enrichment groups by `(movie_title, production_year, original_title)`, queries TMDB once per group, mutates `Screening` in place.
 - TMDB rate-limited: `asyncio.Semaphore(5)` + 3 retries with exponential backoff (2s/4s/8s) on 429.
 - Year threshold: `datetime.now().year - 10`. Films ≤ threshold or with `skip_year_filter=True` pass.
@@ -96,7 +98,7 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 
 - `TMDB_API_KEY` in `.env` (create from scratch, no template file)
 - Python 3.13+, `pip install -r requirements.txt` → `playwright install chromium`
-- `cache/`, `output/`, `venv/`, `logs/` in `.gitignore`
+- `cache/`, `output/`, `venv/`, `logs/`, `.pytest_cache/`, `docs/index-*.html` (OneDrive conflict copies) in `.gitignore`; `.env` never committed
 - Scheduled Task (Windows): `NewsletterDaily`, runs `scripts\run_daily.bat`
   - **Primary/failover across machines** (same OneDrive-synced folder): `WORKSTATIONDELL` daily at 14:00 (primary), `FORGE1` daily at 16:00 (failover). Whoever runs second skips via markers.
   - **Two markers** in `cache/`: `run_<yyyy-MM-dd>.txt` (run started, contains `%COMPUTERNAME%` + timestamp) and `deployed_<yyyy-MM-dd>.txt` (deploy succeeded, written by `deploy_quiet.bat`). Logic: deployed exists → skip; fresh run marker (<30 min, other run may still go) → skip; stale run marker without deploy → skip scrape, retry deploy (failover); no marker → full run. Run marker deleted on pipeline failure (allows retry). Markers >14 days cleaned up automatically.
@@ -106,7 +108,7 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 
 ## Test quirks
 
-- All 46 tests synchronous, no external dependencies.
+- All 57 tests synchronous, no external dependencies.
 - `conftest.py` provides `tmdb_service` (fake API key), `sample_screenings` (3 fixtures), `config_file` (tmp_path YAML), `filmrausch_embedded_json` fixture.
 - No tests exercise the actual TMDB API — mocking needed for integration tests.
 
@@ -120,3 +122,9 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 | `services/newsletter.py` | Jinja2 rendering with `de_DE` locale |
 | `templates/newsletter.html` | Single Jinja2 template with inline CSS/JS |
 | `config.yaml` | Cinema configs, title filters, output format |
+
+## Git workflow ("Commit all")
+
+- Trigger phrase `Commit all` = run `git add -A`, review `git diff --cached --stat` + `git diff --cached`, commit with conventional message (`feat:`/`fix:`/`refactor:`).
+- Before committing, intervene (stop + ask) on: secrets in diff (`.env`, keys), unexpected huge files, `cache/`/`output/` data or OneDrive conflict copies staged, branch `behind origin`, unclear diffs.
+- `Commit all` never pushes/deploys. Push/deploy only on explicit `push`/`deploy` instruction. Manual `docs/`-only deploys by the user are always safe (idempotent live-site update); source commits are coordinated.
