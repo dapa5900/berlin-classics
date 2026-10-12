@@ -34,6 +34,8 @@ cinemas:
     title_filters: []
 
 newsletter:
+  # Days a screening keeps its "new" highlight after first appearing.
+  new_highlight_days: 7
 
 tmdb:
   language: "de-DE"

@@ -121,7 +121,8 @@ CACHE_DIR = Path("cache")
 CACHE_FILE = CACHE_DIR / "screenings.json"
 CACHE_ENRICHED_FILE = CACHE_DIR / "screenings_enriched.json"
 SNAPSHOT_DIR = CACHE_DIR / "snapshots"
-SNAPSHOT_KEEP_DAYS = 8
+SNAPSHOT_KEEP_DAYS = 14
+DEFAULT_NEW_HIGHLIGHT_DAYS = 7
 
 
 def screening_key(screening: Screening) -> tuple:
@@ -144,20 +145,36 @@ def _snapshot_path_for(day: str) -> Path:
     return SNAPSHOT_DIR / f"screenings_{day}.json"
 
 
-def load_baseline_keys(today: str) -> set[tuple]:
-    """Keys of the youngest snapshot older than today (empty if none)."""
+def load_baseline_keys(today: str, window_days: int = DEFAULT_NEW_HIGHLIGHT_DAYS) -> set[tuple]:
+    """Union of keys from all snapshots within the last `window_days` days.
+
+    A screening counts as known when its key appears in ANY snapshot of the
+    window, so `is_new` stays set for `window_days` after first appearance
+    instead of expiring with the next snapshot. Returns empty when there is
+    no snapshot history (first run flags nothing).
+    """
     if not SNAPSHOT_DIR.exists():
         return set()
-    candidates = sorted(SNAPSHOT_DIR.glob("screenings_*.json"))
-    previous = [p for p in candidates if p.stem != f"screenings_{today}"]
-    if not previous:
-        return set()
     try:
-        data = json.loads(previous[-1].read_text(encoding="utf-8"))
-        return {(e["movie_title"], e["venue"], e["date"]) for e in data}
-    except Exception as e:
-        logger.warning(f"Failed to load baseline snapshot: {e}")
+        today_date = datetime.strptime(today, "%Y-%m-%d").date()
+    except ValueError:
+        logger.warning(f"Invalid date for baseline: {today!r}")
         return set()
+    keys: set[tuple] = set()
+    for path in sorted(SNAPSHOT_DIR.glob("screenings_*.json")):
+        day = path.stem.replace("screenings_", "", 1)
+        try:
+            age = (today_date - datetime.strptime(day, "%Y-%m-%d").date()).days
+        except ValueError:
+            continue
+        if age < 1 or age > window_days:
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            keys.update((e["movie_title"], e["venue"], e["date"]) for e in data)
+        except Exception as e:
+            logger.warning(f"Failed to load baseline snapshot {path.name}: {e}")
+    return keys
 
 
 def apply_new_flags(
@@ -419,8 +436,11 @@ def _render_newsletter(
     rendered_names = {s.cinema_name for s in screenings}
     rendered_cinemas = [c for c in cinema_config["cinemas"] if c["name"] in rendered_names]
 
+    window_days = config.get("newsletter", {}).get(
+        "new_highlight_days", DEFAULT_NEW_HIGHLIGHT_DAYS
+    )
     generator = NewsletterGenerator()
-    apply_new_flags(screenings, load_baseline_keys(today))
+    apply_new_flags(screenings, load_baseline_keys(today, window_days))
     generator.generate(
         screenings=screenings,
         output_path=str(output_path),

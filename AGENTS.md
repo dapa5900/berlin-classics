@@ -46,8 +46,8 @@ scrape → cache/screenings.json → title filters → TMDB enrich → filter_no
 
 - **Raw cache** (`cache/screenings.json`): scraper output before TMDB.
 - **Rich cache** (`cache/screenings_enriched.json`): after TMDB, before year/title filters.
-- **Snapshot history** (`cache/snapshots/screenings_YYYY-MM-DD.json`, 8-day rotation): keys-light of the RENDERED classics set (`movie_title`, `venue`, `date`, `year`, `tmdb_url`). Written by `_render_newsletter` after every render (all modes incl. `--fast`). Baseline for `is_new` = youngest snapshot older than today; no baseline → nothing flagged.
-- **New detection**: `screening_key()` = `(movie_title, venue_name or cinema_name, date.isoformat())`. New screening date/venue of a known film counts as new. `Screening.is_new` renders as poster glow (`.is-new .poster`), no badge element.
+- **Snapshot history** (`cache/snapshots/screenings_YYYY-MM-DD.json`, 14-day rotation): keys-light of the RENDERED classics set (`movie_title`, `venue`, `date`, `year`, `tmdb_url`). Written by `_render_newsletter` after every render (all modes incl. `--fast`). Baseline for `is_new` = union of snapshots from the last `newsletter.new_highlight_days` (default 7); no baseline → nothing flagged.
+- **New detection**: `screening_key()` = `(movie_title, venue_name or cinema_name, date.isoformat())`. New screening date/venue of a known film counts as new. `Screening.is_new` renders as poster glow (`.is-new .poster`), no badge element. Highlight window via `newsletter.new_highlight_days` in `config.yaml` (default 7).
 - **Footer sources** (`rendered_cinemas`): only cinemas present in the rendered set — computed in `_render_newsletter`, footer iterates that list, not `config.cinemas`.
 
 ## Architecture

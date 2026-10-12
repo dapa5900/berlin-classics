@@ -84,7 +84,7 @@ Body line-height: `1.7`.
 - **Movie title link hover**: Turns gold `#D4AF37`.
 - **Poster link**: Wraps poster in `<a>` to cinema page, no underline decoration.
 - **Per-card Google button** (`.gcal-btn` 34px, borderless, calendar-plus icon with centered plus): opens one prefilled Google-Calendar event for that screening in a new tab (`calendar.google.com/calendar/render?action=TEMPLATE`, times converted Berlin-local → UTC, all-day as `YYYYMMDD/YYYYMMDD`). Doubles as the date indicator. No checkboxes, no ICS export.
-- **New-poster-glow** (`.is-new .poster`, gold glow + gold border): screenings whose `(title, venue, date)` key is absent from the youngest snapshot older than today render with a subtle golden glow on the poster thumbnail only. First run without history marks nothing. Header uses `flex-start` top alignment with shrinkable date text so narrow cards never overflow.
+- **New-poster-glow** (`.is-new .poster`, gold glow + gold border): screenings whose `(title, venue, date)` key is absent from all snapshots of the last `new_highlight_days` (default 7) render with a subtle golden glow on the poster thumbnail only. First run without history marks nothing. Header uses `flex-start` top alignment with shrinkable date text so narrow cards never overflow.
 
 ## Visual Effects
 
@@ -98,9 +98,9 @@ Body line-height: `1.7`.
 ## Content Logic (backend-driven)
 
 - Screenings grouped by `cinema_name`, sorted by date
-- `is_new` screenings carry a gold "NEU" badge (see above); baseline = youngest `cache/snapshots/` entry older than today (8-day rotation, keys-light: title/venue/date/year/TMDB URL)
+- `is_new` screenings glow on the poster (see above; no badge element); baseline = union of `cache/snapshots/` entries from the last `new_highlight_days` (14-day rotation, keys-light: title/venue/date/year/TMDB URL)
 - Special handling for "Best of Cinema" → shows "Ganztägig" instead of time
-- Special handling for Open Air Kino → `venue_name` used as grouping label per screening
+- Special handling for Open Air Kino → `venue_name` is only the GCal/`data-cinema` label per screening, section stays "Open Air Cinema"
 - Posters sourced from TMDB; if missing → gold placeholder with "BERLIN CLASSICS" text
 - Each screening card carries `data-*` attributes for calendar export (title, year, date, time, runtime, cinema, location/Google Maps URL, TMDB URL)
 

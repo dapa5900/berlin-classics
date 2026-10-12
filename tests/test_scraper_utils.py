@@ -185,24 +185,87 @@ class TestNewFlags:
         monkeypatch.setattr(main, "SNAPSHOT_DIR", tmp_path)
         assert load_baseline_keys("2026-10-08") == set()
 
+        ancient = [self._make_screening("Jaws 0")]
+        main.save_snapshot(ancient, "2026-09-24")
+        assert (tmp_path / "screenings_2026-09-24.json").exists()
+
         old = [self._make_screening()]
-        main.save_snapshot(old, "2026-09-30")
-        assert (tmp_path / "screenings_2026-09-30.json").exists()
+        main.save_snapshot(old, "2026-10-02")
 
         current = [self._make_screening(), self._make_screening("Jaws 2")]
         main.save_snapshot(current, "2026-10-07")
 
-        # Baseline = youngest snapshot older than today
+        # Baseline = union of snapshots within the highlight window
+        # (2026-09-24 is too old for the 7-day window, 2026-10-02 fits)
         assert load_baseline_keys("2026-10-07") == {
             screening_key(s) for s in old
         }
 
         main.save_snapshot(current, "2026-10-08")
 
-        # 8-day-old snapshot pruned, 8-day window kept
-        assert not (tmp_path / "screenings_2026-09-30.json").exists()
+        # 14-day-old snapshot pruned, younger ones kept
+        assert not (tmp_path / "screenings_2026-09-24.json").exists()
         assert (tmp_path / "screenings_2026-10-07.json").exists()
         assert (tmp_path / "screenings_2026-10-08.json").exists()
 
         baseline = load_baseline_keys("2026-10-08")
-        assert baseline == {screening_key(s) for s in current}
+        assert baseline == {screening_key(s) for s in old + current}
+
+    def test_baseline_window_keeps_week_old_items_known(self, tmp_path, monkeypatch):
+        import main
+        from main import apply_new_flags, load_baseline_keys
+
+        monkeypatch.setattr(main, "SNAPSHOT_DIR", tmp_path)
+        week_old = [self._make_screening("Jaws 3")]
+        main.save_snapshot(week_old, "2026-10-03")  # age 7 on 2026-10-10
+        main.save_snapshot([self._make_screening()], "2026-10-09")
+
+        screenings = [self._make_screening("Jaws 3"), self._make_screening("Jaws 4")]
+        apply_new_flags(screenings, load_baseline_keys("2026-10-10"))
+        assert screenings[0].is_new is False  # seen 7 days ago: still known
+        assert screenings[1].is_new is True  # never seen: new
+
+    def test_baseline_window_expires_after_seven_days(self, tmp_path, monkeypatch):
+        import main
+        from main import apply_new_flags, load_baseline_keys
+
+        monkeypatch.setattr(main, "SNAPSHOT_DIR", tmp_path)
+        main.save_snapshot([self._make_screening("Jaws 3")], "2026-10-02")  # age 8
+        main.save_snapshot([self._make_screening("Jaws 2")], "2026-10-09")
+
+        screenings = [self._make_screening("Jaws 3"), self._make_screening("Jaws 2")]
+        apply_new_flags(screenings, load_baseline_keys("2026-10-10"))
+        assert screenings[0].is_new is True  # outside window: new again
+        assert screenings[1].is_new is False  # inside window: known
+
+    def test_baseline_tolerates_missing_days(self, tmp_path, monkeypatch):
+        import main
+        from main import load_baseline_keys, screening_key
+
+        monkeypatch.setattr(main, "SNAPSHOT_DIR", tmp_path)
+        old = [self._make_screening()]
+        main.save_snapshot(old, "2026-10-05")  # gap: no 10-06..10-09 snapshots
+        assert load_baseline_keys("2026-10-10") == {
+            screening_key(s) for s in old
+        }
+
+    def test_baseline_custom_window(self, tmp_path, monkeypatch):
+        import main
+        from main import load_baseline_keys, screening_key
+
+        monkeypatch.setattr(main, "SNAPSHOT_DIR", tmp_path)
+        old = [self._make_screening()]
+        main.save_snapshot(old, "2026-10-05")
+        assert load_baseline_keys("2026-10-10", window_days=3) == set()
+        assert load_baseline_keys("2026-10-10", window_days=7) == {
+            screening_key(s) for s in old
+        }
+
+    def test_baseline_ignores_today_and_invalid_dates(self, tmp_path, monkeypatch):
+        import main
+        from main import load_baseline_keys
+
+        monkeypatch.setattr(main, "SNAPSHOT_DIR", tmp_path)
+        main.save_snapshot([self._make_screening()], "2026-10-10")
+        assert load_baseline_keys("2026-10-10") == set()  # today's own: excluded
+        assert load_baseline_keys("not-a-date") == set()
