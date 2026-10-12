@@ -483,7 +483,7 @@ async def main_async():
             "TMDB_API_KEY environment variable is not set. "
             "Copy .env.example to .env and add your API key."
         )
-        return
+        return 2
 
     tmdb_service = TMDBService(
         api_key=api_key,
@@ -497,12 +497,12 @@ async def main_async():
         enriched = load_enriched_cache()
         if not enriched:
             logger.error("No enriched cache found. Run without --fast first.")
-            return
+            return 1
         filtered = _apply_title_filters(enriched, config)
         classical = _apply_year_filter(filtered, threshold)
         _render_newsletter(classical, config, threshold)
         logger.info(f"Newsletter generated with {len(classical)} screenings (fast)")
-        return
+        return 0
 
     all_raw = []
 
@@ -511,7 +511,7 @@ async def main_async():
         cached = load_screenings_from_cache()
         if not cached:
             logger.error("No cached screenings found for re-enrichment")
-            return
+            return 1
         all_raw = cached
         tmdb_service._cache.clear()
     elif args.cinema:
@@ -539,7 +539,7 @@ async def main_async():
 
     if not all_raw:
         logger.warning("No screenings found")
-        return
+        return 1
 
     save_screenings_to_cache(all_raw)
 
@@ -563,7 +563,8 @@ async def main_async():
     _render_newsletter(classical, config, threshold)
 
     logger.info(f"Newsletter generated with {len(classical)} screenings")
+    return 0
 
 
 if __name__ == "__main__":
-    asyncio.run(main_async())
+    raise SystemExit(asyncio.run(main_async()))

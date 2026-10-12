@@ -3,6 +3,7 @@ setlocal enabledelayedexpansion
 set _start=%time%
 call venv\Scripts\activate
 python main.py %*
+set "_pyerr=%errorlevel%"
 set _end=%time%
 for /f "tokens=1-3 delims=:., " %%a in ("!_start!") do set _sh=%%a& set _sm=%%b& set _ss=%%c
 for /f "tokens=1-3 delims=:., " %%a in ("!_end!") do set _eh=%%a& set _em=%%b& set _es=%%c
@@ -19,3 +20,4 @@ set "_output=!_s!s"
 if !_m! GTR 0 set "_output=!_m!m !_s!s"
 if !_h! GTR 0 set "_output=!_h!h !_m!m !_s!s"
 echo Elapsed: !_output!
+exit /b %_pyerr%
