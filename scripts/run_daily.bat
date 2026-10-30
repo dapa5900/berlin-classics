@@ -8,6 +8,11 @@ rem after straight-line code is fine.
 setlocal enabledelayedexpansion
 cd /d "%~dp0.."
 
+rem --- FORGE1 failover permanently disabled (2026-10-12): never run on FORGE1 ---
+rem --- Task itself is deleted on FORGE1 via scripts\disable_forge_task.bat; ---
+rem --- this guard is the belt-and-braces against accidental re-registration. ---
+if /i "%COMPUTERNAME%"=="FORGE1" goto :forge_disabled
+
 for /f "delims=" %%i in ('powershell -NoProfile -Command Get-Date -Format yyyy-MM-dd') do set "_today=%%i"
 set "marker=cache\run_!_today!.txt"
 set "deployed=cache\deployed_!_today!.txt"
@@ -72,3 +77,7 @@ exit /b 1
 :deploy_failed
 echo %date% %time% %COMPUTERNAME% - Daily run ok, but DEPLOY FAILED. >> "logs\scheduler.log"
 exit /b 1
+
+:forge_disabled
+echo %date% %time% %COMPUTERNAME% - FORGE1 failover disabled, skipping. >> "logs\scheduler.log"
+exit /b 0
