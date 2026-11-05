@@ -146,6 +146,38 @@ class TMDBService:
         )
         return max(sim_title, sim_original)
 
+    def _pick_best_similarity_match(
+        self,
+        results: list,
+        search_title: str,
+        expected_year: Optional[int],
+    ) -> Optional[dict]:
+        best_match = None
+        best_similarity = 0.0
+        best_year_diff = float("inf")
+        for m in results:
+            release_date = m.get("release_date", "")
+            year = int(release_date[:4]) if release_date else None
+            title_similarity = self._best_title_similarity(m, search_title)
+            if title_similarity < 0.7:
+                continue
+            if year and expected_year:
+                year_diff = abs(year - expected_year)
+                if (
+                    title_similarity > best_similarity
+                    or (
+                        title_similarity == best_similarity
+                        and year_diff < best_year_diff
+                    )
+                ):
+                    best_match = m
+                    best_similarity = title_similarity
+                    best_year_diff = year_diff
+            elif title_similarity > best_similarity:
+                best_match = m
+                best_similarity = title_similarity
+        return best_match
+
     def _clean_title(self, title: str) -> str:
         cleaned = unicodedata.normalize("NFD", title)
         cleaned = "".join(c for c in cleaned if not unicodedata.combining(c))
@@ -394,33 +426,15 @@ class TMDBService:
                                     matched_movie = m
                                     break
 
-                        # 6. Best similarity fallback
+                        # 6. Best similarity fallback: title quality wins, year
+                        #    diff only breaks ties — a wrong scraped year must
+                        #    not sink an exact title match (e.g. "2001: A Space
+                        #    Odyssey" year 2001 beating Kubrick 1968 via a 2007
+                        #    documentary with near-identical title).
                         if not matched_movie:
-                            best_match = None
-                            best_similarity = 0
-                            best_year_diff = float("inf")
-
-                            for m in results:
-                                release_date = m.get("release_date", "")
-                                year = (
-                                    int(release_date[:4]) if release_date else None
-                                )
-                                title_similarity = (
-                                    self._best_title_similarity(
-                                        m, cleaned_title
-                                    )
-                                )
-
-                                if title_similarity >= 0.7:
-                                    if year and expected_year:
-                                        year_diff = abs(year - expected_year)
-                                        if year_diff < best_year_diff:
-                                            best_year_diff = year_diff
-                                            best_similarity = title_similarity
-                                            best_match = m
-                                    elif title_similarity > best_similarity:
-                                        best_similarity = title_similarity
-                                        best_match = m
+                            best_match = self._pick_best_similarity_match(
+                                results, cleaned_title, expected_year
+                            )
                             if best_match:
                                 matched_movie = best_match
 

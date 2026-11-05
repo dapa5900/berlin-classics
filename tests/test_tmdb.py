@@ -134,3 +134,44 @@ class TestCalculateTitleSimilarity:
     def test_case_insensitive(self):
         result = self.service._calculate_title_similarity("THE GODFATHER", "the godfather")
         assert result == 1.0
+
+
+class TestPickBestSimilarityMatch:
+    """Step 6 fallback must prefer title similarity over year proximity."""
+
+    def setup_method(self):
+        self.service = TMDBService(api_key="test_key", language="de-DE")
+
+    def test_exact_title_beats_year_closer_documentary(self):
+        results = [
+            {
+                "id": 1,
+                "title": "2001: A Space Odyssey – What Is Out There?",
+                "original_title": "2001: A Space Odyssey – What Is Out There?",
+                "release_date": "2007-01-01",
+            },
+            {
+                "id": 2,
+                "title": "2001: A Space Odyssey",
+                "original_title": "2001: A Space Odyssey",
+                "release_date": "1968-04-02",
+            },
+        ]
+        pick = self.service._pick_best_similarity_match(
+            results, "2001: A Space Odyssey", 2001
+        )
+        assert pick is not None and pick["id"] == 2
+
+    def test_equal_similarity_tie_breaks_on_year(self):
+        results = [
+            {"id": 1, "title": "King Kong", "original_title": "King Kong", "release_date": "1933-03-07"},
+            {"id": 2, "title": "King Kong", "original_title": "King Kong", "release_date": "2005-12-14"},
+        ]
+        pick = self.service._pick_best_similarity_match(results, "King Kong", 2005)
+        assert pick is not None and pick["id"] == 2
+
+    def test_no_candidate_below_threshold(self):
+        results = [
+            {"id": 1, "title": "Pulp Fiction", "original_title": "Pulp Fiction", "release_date": "1994-10-14"},
+        ]
+        assert self.service._pick_best_similarity_match(results, "The Godfather", 1972) is None

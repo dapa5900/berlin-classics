@@ -269,3 +269,41 @@ class TestNewFlags:
         main.save_snapshot([self._make_screening()], "2026-10-10")
         assert load_baseline_keys("2026-10-10") == set()  # today's own: excluded
         assert load_baseline_keys("not-a-date") == set()
+
+
+class TestBabylonYearExtraction:
+    """Title-borne years must not be mistaken for production years."""
+
+    INTRO = (
+        "Clockwork Kubrick: 2001: A Space Odyssey [OmU], "
+        "GB USA 1968, R: Stanley Kubrick mit Keir Dullea, 147 Min"
+    )
+
+    def test_title_year_would_win_without_strip(self):
+        from scrapers.babylon import extract_production_year
+
+        assert extract_production_year(self.INTRO) == 2001
+
+    def test_title_year_removed_yields_real_year(self):
+        from scrapers.babylon import extract_production_year, strip_title_from_intro
+
+        cleaned = strip_title_from_intro(self.INTRO, "2001: A Space Odyssey [OmU]")
+        assert extract_production_year(cleaned) == 1968
+
+    def test_strip_handles_non_breaking_space(self):
+        from scrapers.babylon import extract_production_year, strip_title_from_intro
+
+        intro = self.INTRO.replace("Odyssey [OmU]", "Odyssey\xa0[OmU]")
+        cleaned = strip_title_from_intro(intro, "2001: A Space Odyssey [OmU]")
+        assert extract_production_year(cleaned) == 1968
+
+    def test_comma_year_still_preferred(self):
+        from scrapers.babylon import extract_production_year
+
+        assert extract_production_year("Der Name, 1972, R: X, 120 Min") == 1972
+
+    def test_fallback_skips_runtime_year(self):
+        from scrapers.babylon import extract_production_year
+
+        assert extract_production_year("Film GB USA 1968 R: X 1999 Min") == 1968
+        assert extract_production_year("Film 1999 Min, R: X") is None

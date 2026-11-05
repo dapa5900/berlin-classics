@@ -13,6 +13,29 @@ FESTIVAL_PREFIX_OVERRIDES = {
 }
 
 
+def strip_title_from_intro(introtext: str, title: str) -> str:
+    """Remove the screening title from the intro text so year extraction
+    cannot match years that are part of the title itself
+    (e.g. the "2001" in "2001: A Space Odyssey")."""
+    if not title:
+        return introtext
+    # The page uses non-breaking spaces in some places (e.g. "Odyssey\xa0[OmU]")
+    # while the scraped title contains regular spaces.
+    return introtext.replace("\xa0", " ").replace(title, " ")
+
+
+def extract_production_year(introtext: str) -> int | None:
+    year_match = re.search(r",\s*(\d{4})", introtext)
+    if year_match:
+        return int(year_match.group(1))
+
+    for m in re.finditer(r"\b(18\d{2}|19\d{2}|20\d{2})\b", introtext):
+        after_match = introtext[m.end() : m.end() + 10]
+        if "Min" not in after_match and "min" not in after_match:
+            return int(m.group(1))
+    return None
+
+
 def _strip_festival_prefix(movie_title: str, event) -> str:
     cat_classes_raw = event.get("class", "")
     if isinstance(cat_classes_raw, list):
@@ -134,20 +157,8 @@ class BabylonScraper(BaseScraper):
             if introtext_elem:
                 introtext = introtext_elem.get_text(strip=True)
 
-                year_match = re.search(r",\s*(\d{4})", introtext)
-                if year_match:
-                    production_year = int(year_match.group(1))
-
-                if not production_year:
-                    year_matches = re.finditer(
-                        r"\b(18\d{2}|19\d{2}|20\d{2})\b", introtext
-                    )
-                    for m in year_matches:
-                        potential_year = int(m.group(1))
-                        after_match = introtext[m.end() : m.end() + 10]
-                        if "Min" not in after_match and "min" not in after_match:
-                            production_year = potential_year
-                            break
+                year_ctx = strip_title_from_intro(introtext, movie_title)
+                production_year = extract_production_year(year_ctx)
 
                 bracket_contents = re.findall(r"\[([^\]]+)\]", introtext)
                 for content in bracket_contents:

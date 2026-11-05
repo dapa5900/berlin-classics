@@ -62,7 +62,7 @@ scrape → cache/screenings.json → title filters → TMDB enrich → filter_no
 
 ## Scraper gotchas
 
-- **Babylon**: HTTP GET to `/programm`. Each `.mix` `<li>` has `cat-*` CSS class. `_strip_festival_prefix` auto-detects festival sections. Uses `.right-mix .mix-title`, `.mix-introtext` (year via `,\s*(\d{4})`, original via `[...]`), `.right-mix .runtime`. Date has no year → `resolve_screening_date` assumes current year, rolls to next year if in the past; unparseable dates log a warning and fall back to today 20:00.
+- **Babylon**: HTTP GET to `/programm`. Each `.mix` `<li>` has `cat-*` CSS class. `_strip_festival_prefix` auto-detects festival sections. Uses `.right-mix .mix-title`, `.mix-introtext` (year via `extract_production_year`, original via `[...]`), `.right-mix .runtime`. **Year pitfall**: `strip_title_from_intro` must remove the title from the intro BEFORE year extraction, else title-borne years win (e.g. "2001" from "2001: A Space Odyssey" → production_year 2001 instead of 1968); it normalizes `\xa0` (non-breaking space) because intro and title differ there. Date has no year → `resolve_screening_date` assumes current year, rolls to next year if in the past; unparseable dates log a warning and fall back to today 20:00.
 - **Zoo Palast**: Playwright-based. Intercepts API JSON from `premiumkino.de/program` via network listener. Also scrapes `/specials/filmklassiker` to set `skip_year_filter=True`. Chromium only launches when a Zoo scrape is actually requested (`_needs_browser`); pure-HTTP runs skip it.
 - **Best of Cinema**: Fetches each movie subpage. `Produktionsjahr:` and `Laufflänge` regex. **Date regex**: uses `(\d{2})\.(\d{2})\.(\d{4})` — do NOT use `(\d{2})` for year.
 - **Open Air Kino**: No `production_year` or `runtime`. Date in `div.meta_kino` previous sibling of `<article>`, uses `[\w.]+` for abbreviated German months. Multi-cinema aggregator — sets `venue_name`. Missing year part → current year + same past-date rollover as Babylon (`resolve_openair_date`); unparseable dates are skipped with a warning, never `datetime.now()`.
@@ -82,7 +82,7 @@ Fallback main search: BOTH `de-DE` + `en-US`, deduplicated by TMDB ID.
 3. Exact year (any title)
 4. ±3yr + similarity ≥ 0.8
 5. ±2yr + similarity ≥ 0.5
-6. Best similarity (≥0.7, best year diff wins)
+6. Best similarity via `_pick_best_similarity_match` (≥0.7): title similarity wins, year diff only breaks ties (a same-title Doku with closer year must not beat the real film, e.g. TMDB 699744 vs 62 for "2001")
 
 **Without `expected_year` (e.g. Open Air Kino):**
 - Exact title matches → `_pick_by_runtime` if multiple + runtime > 0, else by TMDB `popularity`
